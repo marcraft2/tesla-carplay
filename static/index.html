@@ -1,0 +1,184 @@
+
+<html>
+<script type="text/javascript" src="./jsmpeg.min.js"></script>
+
+<style>
+body {
+  height: 717px;
+  width: 848px;
+  margin: 0;
+}
+
+#error {
+  margin-top: auto;
+  margin-bottom: auto;
+  text-align: center;
+  flex-grow: 1;
+  display: block;
+}
+
+canvas {
+  height: 717px;
+  width: 848px;
+  margin: 0;
+  padding: 0;
+  vertical-align: bottom;
+}
+</style>
+
+
+<body>
+  <canvas id="video-canvas" ontouchstart="handleDown(event)" ontouchend="handleUp(event)" ontouchmove="handleMove(event)" onmousedown="handleMDown(event)" onmouseup="handleMUp(event)" onmousemove="handleMMove(event)"></canvas>
+  <div id="error">CONNECT IPHONE TO BEGIN CARPLAY</div>
+</body>
+<script>
+
+
+const host = window.location.hostname + ":" + window.location.port
+
+var height = 717
+var width = 848
+var mouseDown = false
+var lastX = 0
+var lastY = 0
+
+console.log("On start");
+
+console.log(host);
+
+var ws = new WebSocket('ws://'+host+'/ws/control');
+ws.onopen = function () {
+    console.log('Websocket is connected ...')
+    let data = {
+      type: 'statusReq'
+    }
+    ws.send(JSON.stringify(data))
+}
+ws.onmessage = function (message) {
+    message = JSON.parse(message.data)
+    console.log(message);
+    if (message.type == 'statusReq') {
+          if (message.data == 'plugged') {
+                //document.getElementById('video-canvas').style.display = 'block'
+                document.getElementById('error').style.display = 'none'
+          } else if (message.data == 'unplugged') {
+                //document.getElementById('video-canvas').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+          }
+    } else if (message.type == "other") {
+
+    }
+}
+
+function handleMDown(e) {
+  console.log("touched", e, e.target.getBoundingClientRect())
+  let currentTargetRect = e.target.getBoundingClientRect();
+  let x = e.clientX - currentTargetRect.left
+  let y = e.clientY - currentTargetRect.top
+  lastX = x / width
+  lastY = y / height
+  mouseDown = true
+  let data = {
+    type: 'click',
+    data: {type: 14, x: x, y: y}
+  }
+  ws.send(JSON.stringify(data))
+}
+
+function handleMUp(e) {
+    console.log("touched end", e)
+    let currentTargetRect = e.target.getBoundingClientRect();
+    let x = e.clientX - currentTargetRect.left
+    let y = e.clientY - currentTargetRect.top
+    x = x / width
+    y = y / height
+    mouseDown = false
+    let data = {
+      type: 'click',
+      data: {type: 16, x: x, y: y}
+    }
+    ws.send(JSON.stringify(data))
+}
+
+
+function handleMMove(e) {
+    if (mouseDown) {
+      console.log("touched drag", e)
+      let currentTargetRect = e.target.getBoundingClientRect();
+      let x = e.clientX - currentTargetRect.left
+      let y = e.clientY - currentTargetRect.top
+      x = x / width
+      y = y / height
+      let data = {
+        type: 'click',
+        data: {type: 15, x: x, y: y}
+      }
+      ws.send(JSON.stringify(data))
+    }
+}
+
+function handleDown(e) {
+    console.log("touched", e, e.target.getBoundingClientRect())
+    let currentTargetRect = e.target.getBoundingClientRect();
+    let x = e.touches[0].clientX - currentTargetRect.left
+    let y = e.touches[0].clientY - currentTargetRect.top
+    x = x / width
+    y = y / height
+    lastX = x
+    lastY = y
+    mouseDown = true
+    let data = {
+      type: 'click',
+      data: {type: 14, x: x, y: y}
+    }
+    ws.send(JSON.stringify(data))
+}
+function handleUp(e) {
+    console.log("touched end", e)
+    let currentTargetRect = e.target.getBoundingClientRect();
+    let x = lastX
+    let y = lastY
+    mouseDown = false
+    let data = {
+      type: 'click',
+      data: {type: 16, x: x, y: y}
+    }
+    ws.send(JSON.stringify(data))
+}
+
+
+function handleMove(e) {
+    if (mouseDown) {
+      console.log("touched drag", e)
+      let currentTargetRect = e.target.getBoundingClientRect();
+      let x = e.touches[0].clientX - currentTargetRect.left
+      let y = e.touches[0].clientY - currentTargetRect.top
+      x = x / width
+      y = y / height
+      let data = {
+        type: 'click',
+        data: {type: 15, x: x, y: y}
+      }
+      ws.send(JSON.stringify(data))
+    }
+}
+
+
+let isInit = false;
+document.addEventListener('click', function () {
+    if (isInit) {
+        return
+    }
+    isInit = true;
+    var canvas = document.getElementById('video-canvas')
+    var url = 'ws://'+host+'/ws/video';
+    var player = new JSMpeg.Player(url, {
+        canvas: canvas,
+        autoplay: true
+    });
+    player.audioOut.unlock(function () {});
+    console.log("On first click");
+});
+
+</script>
+</html>

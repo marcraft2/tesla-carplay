@@ -1,0 +1,8 @@
+{
+  "name": "tesla-carplay",
+  "author": "Marc Dubois",
+  "dependencies": {
+    "node-carplay": "^1.0.14",
+    "ws": "^8.2.3"
+  }
+}
