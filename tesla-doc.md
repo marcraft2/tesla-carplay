@@ -176,3 +176,7 @@ systemctl restart hostapd
 ```
 
 Your wifi network are ready, you should see it in the list of your wifi network on your pc or smartphone. However, this network does not have internet access at the moment.
+
+
+
+.............
