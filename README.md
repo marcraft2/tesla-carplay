@@ -21,5 +21,5 @@ The project is not finished. You can find a [start of documentation](https://git
 - The tesla navigator mutes the sound, if the parking mode is removed. (One solution would be to go through Bluetooth, I haven't had time to test yet)
 - This solution requires a 4G subscription, however you no longer need to pay the tesla subscription, and you have Wi-Fi in your car.
 - The wireless Carplay does not work. (It's possible, I haven't had time to look yet)
-- You have to study whether the Tesla's usb port is disabled when you get out of the car, or if not, look at the long-term consumption.<
+- You have to study whether the Tesla's usb port is disabled when you get out of the car, or if not, look at the long-term consumption.
 - Wifi stability, if your usb 3G / 4G dongle loses its connection, your tesla will disconnect from your Wi-Fi (I haven't yet had the time to see if we can bypass the Tesla's wi-fi security system)
