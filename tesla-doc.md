@@ -73,6 +73,7 @@ Remove `#` in front of `PermitRootLogin`, and set it to `yes` :
 ```
 PermitRootLogin yes
 ```
+You can now save the file with `CTRL + O` then `Enter`. And quit `nano` text editor with `CTRL + X`
 
 Restart the ssh service to apply the changes.
 ```
