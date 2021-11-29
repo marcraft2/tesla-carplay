@@ -22,4 +22,20 @@ The project is not finished. You can find a [start of documentation](https://git
 - This solution requires a 4G subscription, however you no longer need to pay the tesla subscription, and you have Wi-Fi in your car.
 - The wireless Carplay does not work. (It's possible, I haven't had time to look yet)
 - You have to study whether the Tesla's usb port is disabled when you get out of the car, or if not, look at the long-term consumption.
-- Wifi stability, if your usb 3G / 4G dongle loses its connection, your tesla will disconnect from your Wi-Fi (I haven't yet had the time to see if we can bypass the Tesla's wi-fi security system)
+- Wifi stability, if your usb 3G/4G dongle loses its connection, your tesla will disconnect from your Wi-Fi (I haven't yet had the time to see if we can bypass the Tesla's wi-fi security system)
+- Full screen in the Tesla browser unavailable. (For the moment I have a css bug on chromium at the canvas margin)
+
+## Tesla Security
+
+- Tesla's browser blocks access to the website which is located on a private IP address (192.168.X.X, 10.X.X.X, 172.X.X.X). We can bypass this security with IPTABLES
+
+```
+iptables -t nat -A PREROUTING -d 1.1.1.1 -i wlan0 -p tcp --dport 80 -j DNAT --to-destination 192.168.0.254
+iptables -t nat -A PREROUTING -d 1.1.1.1 -i wlan0 -p udp --dport 80 -j DNAT --to-destination 192.168.0.254
+iptables -t nat -A POSTROUTING -s 192.168.0.254 -p tcp --dport 80 -j SNAT --to-source 1.1.1.1
+iptables -t nat -A POSTROUTING -s 192.168.0.254 -p udp --dport 80 -j SNAT --to-source 1.1.1.1
+```
+
+- Tesla blocks browser audio when you remove parking mode. It is therefore necessary to go through bluetooth to have sound while driving.
+
+- You cannot connect with your tesla to a Wi-Fi network that does not have internet access. We therefore need 3G/4G internet access.
