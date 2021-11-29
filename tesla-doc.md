@@ -51,7 +51,8 @@ First, we will make all the updates available. (Typing is command followed by en
 
 ```
 apt install update
-apt install upgrade
+apt install upgrade -y
+apt install curl unzip -y
 ```
 
 Enable SSH
