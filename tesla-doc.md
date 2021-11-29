@@ -7,16 +7,15 @@ We are going to create a Wifi networks from a rabesperry and a 4G chip. Tesla wi
 
 Requirement
 ------
-⋅⋅* Raspberry Pi 4 Modèle B (test with 8GB Ram model)
-⋅⋅* Micro SD Card for Raspberry Pi 4 Modèle B
-⋅⋅* 4G USB Key (test with Huawei E3372)
-⋅⋅* SIM card with 4G
-⋅⋅* Carlinkit (test with CPC200)
-⋅⋅* USB keyboard
-⋅⋅* Micro-HDMI to HDMI
-⋅⋅* Ethernet with internet
-⋅⋅* USB-C Cable for power supply.
-
+ - Raspberry Pi 4 Modèle B (test with 8GB Ram model)
+ - Micro SD Card for Raspberry Pi 4 Modèle B
+ - 4G USB Key (test with Huawei E3372)
+ - SIM card with 4G
+ - Carlinkit (test with CPC200)
+ - USB keyboard
+ - Micro-HDMI to HDMI
+ - Ethernet with internet
+ - USB-C Cable for power supply.
 
 
 OS Installation | Debian
