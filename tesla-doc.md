@@ -2,7 +2,7 @@
 ## Installation guide for tesla navigator
 
 
-We are going to create a Wifi networks from a rabesperry and a 4G chip. Tesla will connect to this WiFi networks, and carplay will be available through a website hosted on the rabeberry in the tesla browser.
+We are going to create a Wifi networks from a Raspberry Pi and a 4G chip. Tesla will connect to this WiFi networks, and Carplay will be available through a website hosted on the Raspberry Pi in the tesla browser.
 
 
 Requirement
@@ -21,17 +21,17 @@ Requirement
 OS Installation | Debian
 ------
 
-First [download debian](https://raspi.debian.net/tested-images/) for the Raspberry Pi, download `xz-compressed image` (Release: `11, (Bullseye)`, Family: `4`, Tested hardware: `4 (4GB)`) (No matter the size of your ram choose Tested hardware: `4 (4GB)` memory size automatically adapt)
+First [download Debian](https://raspi.debian.net/tested-images/) for the Raspberry Pi, download `xz-compressed image` (Release: `11, (Bullseye)`, Family: `4`, Tested hardware: `4 (4GB)`) (No matter the size of your ram choose Tested hardware: `4 (4GB)` memory size automatically adapt)
 
 You now have this file `20210823_raspi_4_bullseye.img.xz` (the date may be different).
 
 Unzip the file, now have this file `20210823_raspi_4_bullseye.img`
 
-We will now put it on the Micro SD Card so that the raspberry can start on Debian.
+We will now put it on the Micro SD Card so that the Raspberry Pi can start on Debian.
 
 Insert the Micro SD Card into your computer.
 
-We will now be able to install debian on the Micro SD Card, for this you will need to [download the Win32 Disk Imager](https://sourceforge.net/projects/win32diskimager/) software and install it.
+We will now be able to install Debian on the Micro SD Card, for this you will need to [download the Win32 Disk Imager](https://sourceforge.net/projects/win32diskimager/) software and install it.
 
 Open Win32 Disk Imager, then in the `Image File` box selected `20210823_raspi_4_bullseye.img`. Then in `Device` box, select the letter of your Micro SD Card. Click on Write. Then wait while loading. Debian is now installed on your Micro SD card.
 
@@ -43,7 +43,7 @@ You can now insert your Micro SD Card in your Raspberry Pi, connect a keyboard, 
 user : `root`
 
 
-You are now connected to a command terminal, with that we will be able to control your rasberry.
+You are now connected to a command terminal, with that we will be able to control your Raspberry Pi.
 
 Attention the keyboard is a QWERTY! (It is not necessary to change, we have very little to do, adapt you)
 
@@ -81,10 +81,8 @@ Restart the ssh service to apply the changes.
 systemctl restart sshd
 ```
 
-
 SSH Connection
 ------
-
 
 Look at the ip address of your `eth0` ethernet interface :
 ```
@@ -94,21 +92,41 @@ It should look like 192.168.X.X or 10.X.X.X
 
 At home I received this ip address 192.168.1.68, yours will certainly be different.
 
-We will now be able to leave the raspberry aside, and access it remotely using ssh. This will make it easier for us to copy paste.
+We will now be able to leave the Raspberry Pi aside, and access it remotely using ssh. This will make it easier for us to copy paste.
 
-For this on windows [download Putty](https://www.putty.org/) software and install it.
+For this on windows [download Putty](https://www.putty.org/) software and install it. Open Putty, in `Host Name (or IP address)` set your ip (me it's 192.168.1.68) (Port: `22`, Connection type: `SSH`) and click `Open` to open the ssh connection.
 
-Open Putty, in `Host Name (or IP address)` set your ip (me it's 192.168.1.68) (Port: `22`, Connection type: `SSH`) and click `Open`
+On linux/macOS you can open the terminal application then type the following command:
+```
+ssh root@192.168.X.X
+```
 
 Enter username and password (user: `root`, password: `root`)
 
-You should now be connected to a terminal of your rasberry.
+You should now be connected to a terminal of your Raspberry Pi.
+
+
+Rename Raspberry Pi | Change hostname
+------
+
+We configure the hostname :
+
+```
+echo 'carplay' > /etc/hostname
+```
+
+To apply the change you must restart the Raspberry Pi :
+
+```
+reboot
+```
+(You will need to reopen your ssh connection)
 
 
 Creation of the Wifi network | hostapd
 ------
 
-At first we will create the wifi networks thanks to the wifi antenna integrated in the Rasberry Pi.
+At first we will create the wifi networks thanks to the wifi antenna integrated in the Raspberry Pi.
 
 We configure the wifi interface. For that we will use the `nano` text editor :
 
@@ -130,6 +148,8 @@ We apply the configuration:
 ```
 systemctl restart networking
 ```
+(You may need to reopen your ssh connection after that)
+
 
 
 Now we should see the ip address `192.168.0.254` on `wlan0` with this command:
@@ -181,3 +201,14 @@ Your wifi network are ready, you should see it in the list of your wifi network 
 
 
 .............
+DNS
+.............
+DHCP
+.............
+Network (iptables)
+.............
+NGINX
+.............
+Node
+.............
+Tesla Carplay (with pm2)

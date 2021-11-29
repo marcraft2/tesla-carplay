@@ -1,14 +1,14 @@
 
 # Tesla Carplay
 
-This project allows you to have Carplay in the tesla browser.
+This project allows you to have Carplay in the tesla browser with Raspberry Pi.
 
 ## Demo
 
 [Youtube Link](https://youtu.be/6aNyr-Qt1Ts)
 
 ## How it works ?
-In fact, add a Raspberry Pi in the tesla, that allows us to create a wifi network so that the tesla can connect. In this Rasberry Pi we will also create a Web server with a stream for the video output of Carplay with WebSocket. The Carplay video stream is retrieved using a CarlinKit adapter. We then create a small html page on the web server, which allows this to connect to the stream with Websocket/JSMPEG, and send the touch gestures to control with WebSocket.
+In fact, add a Raspberry Pi in the tesla, that allows us to create a wifi network so that the tesla can connect. In this Raspberry Pi we will also create a Web server with a stream for the video output of Carplay with WebSocket. The Carplay video stream is retrieved using a CarlinKit adapter. We then create a small html page on the web server, which allows this to connect to the stream with Websocket/JSMPEG, and send the touch gestures to control with WebSocket.
 
 
 ## About
