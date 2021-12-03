@@ -80,13 +80,13 @@ streamServer.listen(STREAM_PORT);
 // -----------------------------------------------------------------------------
 
 const config = {
-        dpi: 5,
+        dpi: 15,
         nightMode: 0,
         hand: 0,
         boxName: 'nodePlay',
         width: 848,
         height: 717,
-        fps: 10,
+        fps: 30,
 }
 
 console.log("spawning carplay", config)

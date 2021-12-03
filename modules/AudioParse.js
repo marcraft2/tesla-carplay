@@ -1,29 +1,24 @@
 const EventEmitter = require('events');
 const spawn = require('child_process').spawn;
-const {Readable} = require('stream');
+const { Readable } = require('stream');
 
-class AudioParse extends EventEmitter {
-    constructor(bitrate, ws, updateState) {
+class AudioParse extends EventEmitter{
+    constructor(updateState) {
         super();
-        this._parser = spawn('ffmpeg', [
+        this._parser = spawn('ffplay', [
             "-hide_banner",
             "-loglevel", "error",
-            "-threads", "0",
+            "-",
             "-f", "s16le",
-            "-ar", `44100`,
             "-ac", "2",
-            "-i", "-",
-            "-f", "mpegts",
-            "-codec:a",  "mp2",
-            "-b:a", bitrate.toString() + "k",
-            ws
-        ])
+            "-ar", `44100`,
+            "-nodisp"])
         this._parser.stderr.on('data', ((data) => {
             console.log(data.toString())
         }))
 
         this._parser.stdout.on('data', ((data) => {
-            console.log(data.toString())
+            //console.log(data.toString())
         }))
 
         this._parser.stdout.on('error', ((data) => {
@@ -36,19 +31,14 @@ class AudioParse extends EventEmitter {
         this._readable._read = () => {
             this._readable.pipe(this._parser.stdin)
         }
-        this._parser2 = spawn('ffmpeg', [
+        this._parser2 = spawn('ffplay', [
             "-hide_banner",
             "-loglevel", "error",
-            "-threads", "0",
+            "-",
             "-f", "s16le",
-            "-ar", `16000`,
             "-ac", "1",
-            "-i", "-",
-            "-f", "mpegts",
-            "-codec:a",  "mp2",
-            "-b:a", bitrate.toString() + "k",
-            ws
-        ])
+            "-ar", `16000`,
+            "-nodisp"])
         this._parser2.stderr.on('data', ((data) => {
             console.log(data.toString())
         }))
@@ -71,56 +61,56 @@ class AudioParse extends EventEmitter {
         this._bytesToRead = 0;
         this._bytesRead = [];
         this._bytesSize = 0;
-        this._audioParse = true;
-        this._navi = false;
-        this._audioType = 1;
-        this._naviPendingStop = false;
+	this._audioParse = true;
+	this._navi = false;
+	this._audioType = 1;
+	this._naviPendingStop = false;
     }
 
     setActive = (bytesToRead) => {
         //console.log("sound active")
-        if (bytesToRead > 0) {
-            this._bytesToRead = bytesToRead
-            if (bytesToRead < 16) {
-                console.log("non-audio found")
-                this._audioParse = false
-            } else {
-                this._audioParse = true
-            }
-            this.updateState(7)
-        }
+	if(bytesToRead >0) {
+	    this._bytesToRead = bytesToRead
+	    if(bytesToRead<16) {
+		console.log("non-audio found")
+		this._audioParse = false
+	    } else {
+		this._audioParse = true
+	    }
+	     this.updateState(7)
+	}
     }
 
     addBytes = (bytes) => {
         this._bytesRead.push(bytes)
         this._bytesSize += Buffer.byteLength(bytes)
         //console.log(this._bytesSize, this._bytesToRead)
-        if (this._bytesSize === this._bytesToRead) {
-            if (this._audioParse) {
-                this.pipeData()
-            } else {
-                let type = Buffer.concat(this._bytesRead)
-                type = type.readInt8(12)
-                if (type === 6) {
-                    console.log("setting audio to nav")
-                    this._navi = true
-                } else if (type === 7) {
-                    console.log("setting audio to pending media")
-                    this._naviPendingStop = true
-                } else if (type === 2 && this._naviPendingStop) {
-                    console.log("setting audio to media now")
-                    this._navi = false
-                    this._naviPendingStop = false
-                } else {
-                    console.log("unknown type: ", type, this._naviPendingStop, this._navi)
-                }
-                this._bytesToRead = 0;
-                this._bytesRead = [];
-                this._bytesSize = 0;
-                this.updateState(0);
-            }
-        }
+        if(this._bytesSize === this._bytesToRead) {
+            if(this._audioParse) {
+	        this.pipeData()
+	    } else {
+		let type = Buffer.concat(this._bytesRead)
+		type = type.readInt8(12)
+		if(type === 6) {
+		    console.log("setting audio to nav")
+		    this._navi = true
+		} else if(type === 7) {
+		    console.log("setting audio to pending media")
+		    this._naviPendingStop = true
+		} else if(type === 2 && this._naviPendingStop) {
+		   console.log("setting audio to media now")
+		   this._navi = false
+		   this._naviPendingStop = false
+		} else {
+		   console.log("unknown type: ", type, this._naviPendingStop, this._navi)
+		}
+        	this._bytesToRead = 0;
+        	this._bytesRead = [];
+        	this._bytesSize = 0;
+        	this.updateState(0);
+	}
     }
+}
     pipeData = () => {
         let fullData = Buffer.concat(this._bytesRead)
         let decodeType = fullData.readUInt32LE(0)
@@ -128,22 +118,22 @@ class AudioParse extends EventEmitter {
         let audioType = fullData.readUInt32LE(8)
         //console.log(decodeType, volume, audioType)
         let outputData = fullData.slice(12, this._bytesToRead)
-        if (decodeType === 2) {
-            if (this._navi && (audioType === 2)) {
-                if (this._parser.stdin.writable) {
-                    this._parser.stdin.write(outputData)
-                } else {
-                    this.emit('warning', 'Audio Stream Full')
-                }
-            } else if (!(this._navi)) {
-                if (this._parser.stdin.writable) {
-                    this._parser.stdin.write(outputData)
-                } else {
-                    this.emit('warning', 'Audio Stream Full')
-                }
-            }
+        if(decodeType === 2) {
+	    if(this._navi && (audioType === 2)) {
+            	    if(this._parser.stdin.writable) {
+                  	    this._parser.stdin.write(outputData)
+            	    } else {
+                	    this.emit('warning', 'Audio Stream Full')
+            	    }
+	    } else if(!(this._navi)) {
+		     if(this._parser.stdin.writable) {
+                  	    this._parser.stdin.write(outputData)
+            	    } else {
+                	    this.emit('warning', 'Audio Stream Full')
+            	    }
+		}
         } else {
-            if (this._parser2.stdin.writable) {
+            if(this._parser2.stdin.writable) {
                 this._parser2.stdin.write(outputData)
             } else {
                 this.emit('warning', 'Audio Stream Full')

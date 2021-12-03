@@ -52,7 +52,6 @@ First, we will make all the updates available. (Typing is command followed by en
 ```
 apt install update
 apt install upgrade -y
-apt install curl unzip -y
 ```
 
 Enable SSH
@@ -120,13 +119,13 @@ To apply the change you must restart the Raspberry Pi :
 ```
 reboot
 ```
-(You will need to reopen your ssh connection)
+(You will need to reopen your ssh connection when the system will be started)
 
 
-Creation of the Wifi network | hostapd
+Creation of the Wi-Fi network | hostapd
 ------
 
-At first we will create the wifi networks thanks to the wifi antenna integrated in the Raspberry Pi.
+At first we will create the wifi networks with the wifi antenna integrated in the Raspberry Pi.
 
 We configure the wifi interface. For that we will use the `nano` text editor :
 
@@ -160,7 +159,7 @@ ip a
 
 We install the software  `hostapd` that will allow us to create a Wifi networks:
 ```
-apt install hostapd
+apt install hostapd -y
 ```
 
 We are now going to configure the wifi networks by editing this file `/etc/hostapd/hostapd.conf`
@@ -186,7 +185,7 @@ wpa_key_mgmt=WPA-PSK
 wpa_pairwise=TKIP
 rsn_pairwise=CCMP
 ssid=Tesla
-wpa_passphrase=AMAZING-WIFI-PASSWORD
+wpa_passphrase=amazingpassword
 ```
 You can now save the file with `CTRL + O` then `Enter`. And quit `nano` text editor with `CTRL + X`
 
