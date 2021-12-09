@@ -1,4 +1,3 @@
-
 <html>
   <head>
     <title>Carplay</title>
@@ -14,12 +13,10 @@
     height: auto;
     width: 100%;
     margin: 0;
-    padding: 0;
-    vertical-align: bottom;
   }
   </style>
   <body>
-    <canvas id="video-canvas"
+    <canvas id="carplay"
             ontouchstart="handleDown(event)"
             ontouchend="handleUp(event)"
             ontouchmove="handleMove(event)"
@@ -29,137 +26,86 @@
   </body>
   <script>
 
-  const host = window.location.hostname + ":" + window.location.port
+  const carplayWidth = 848;
+  const carplayHeight = 717;
 
-  var height = 0
-  var width = 0
-  var mouseDown = false
-  var lastX = 0
-  var lastY = 0
+  const host = window.location.hostname + ':' + window.location.port;
+  var height, width, lastX, lastY, mouseDown;
 
   var ws = new WebSocket('ws://'+host+'/ws/control');
   ws.onopen = function () {
-      console.log('Websocket Control is connected ...')
-      let data = {
+      ws.send(JSON.stringify({
         type: 'statusReq'
-      }
-      ws.send(JSON.stringify(data))
+      }))
   }
   ws.onmessage = function (message) {
       message = JSON.parse(message.data)
-      //console.log(message);
       if (message.type == 'statusReq') {
             if (message.data == 'plugged') {
-                  console.log("IPhone is plugged");
+              console.log('IPhone plugged');
             } else if (message.data == 'unplugged') {
-                  console.log("IPhone is unplugged");
+              console.log('IPhone unplugged');
             }
       }
   }
 
-  var canvas = document.getElementById('video-canvas')
-  var url = 'ws://'+host+'/ws/video';
-  var width = window.innerWidth;
-  var height = width*717/848;
-  canvas.width = width;
-  canvas.height = height;
+  var canvas = document.getElementById('carplay');
+  var url = 'ws://' + host + '/ws/video';
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = width * carplayHeight / carplayWidth;
   var player = new JSMpeg.Player(url, {
       canvas: canvas,
       autoplay: true,
       audio: false
   });
+    
+  function getPosition(e) {
+    let c = e.target.getBoundingClientRect();
+    return [(e.clientX - c.left)/width, (e.clientY - c.top)/height];
+  }
+    
+  function sendData(type, x, y) {
+    ws.send(JSON.stringify({
+      type: 'click',
+      data: {type: type, x: x, y: y}
+    }));
+  }
 
   function handleMDown(e) {
-    //console.log("touched", e, e.target.getBoundingClientRect())
-    let currentTargetRect = e.target.getBoundingClientRect();
-    let x = e.clientX - currentTargetRect.left
-    let y = e.clientY - currentTargetRect.top
-    lastX = x / width
-    lastY = y / height
-    mouseDown = true
-    let data = {
-      type: 'click',
-      data: {type: 14, x: x, y: y}
-    }
-    ws.send(JSON.stringify(data))
+    let [x, y] = getPosition(e);
+    mouseDown = true;
+    sendData(14, x, y);
   }
 
   function handleMUp(e) {
-      //console.log("touched end", e)
-      let currentTargetRect = e.target.getBoundingClientRect();
-      let x = e.clientX - currentTargetRect.left
-      let y = e.clientY - currentTargetRect.top
-      x = x / width
-      y = y / height
-      mouseDown = false
-      let data = {
-        type: 'click',
-        data: {type: 16, x: x, y: y}
-      }
-      ws.send(JSON.stringify(data))
+      let [x, y] = getPosition(e);
+      mouseDown = false;
+      sendData(16, x, y);
   }
 
   function handleMMove(e) {
       if (mouseDown) {
-        //console.log("touched drag", e)
-        let currentTargetRect = e.target.getBoundingClientRect();
-        let x = e.clientX - currentTargetRect.left
-        let y = e.clientY - currentTargetRect.top
-        x = x / width
-        y = y / height
-        let data = {
-          type: 'click',
-          data: {type: 15, x: x, y: y}
-        }
-        ws.send(JSON.stringify(data))
+        let [x, y] = getPosition(e);
+        sendData(15, x, y);
       }
   }
 
   function handleDown(e) {
-      //console.log("touched", e, e.target.getBoundingClientRect())
-      let currentTargetRect = e.target.getBoundingClientRect();
-      let x = e.touches[0].clientX - currentTargetRect.left
-      let y = e.touches[0].clientY - currentTargetRect.top
-      x = x / width
-      y = y / height
-      lastX = x
-      lastY = y
-      mouseDown = true
-      let data = {
-        type: 'click',
-        data: {type: 14, x: x, y: y}
-      }
-      ws.send(JSON.stringify(data))
+      let [x, y] = [lastX, lastY] = getPosition(e);
+      mouseDown = true;
+      sendData(14, x, y);
   }
 
   function handleUp(e) {
-      //console.log("touched end", e)
-      let currentTargetRect = e.target.getBoundingClientRect();
-      let x = lastX
-      let y = lastY
-      mouseDown = false
-      let data = {
-        type: 'click',
-        data: {type: 16, x: x, y: y}
-      }
-      ws.send(JSON.stringify(data))
+      mouseDown = false;
+      sendData(16, lastX, lastY);
   }
 
   function handleMove(e) {
       if (mouseDown) {
-        //console.log("touched drag", e)
-        let currentTargetRect = e.target.getBoundingClientRect();
-        let x = e.touches[0].clientX - currentTargetRect.left
-        let y = e.touches[0].clientY - currentTargetRect.top
-        x = x / width
-        y = y / height
-        let data = {
-          type: 'click',
-          data: {type: 15, x: x, y: y}
-        }
-        ws.send(JSON.stringify(data))
+        let [x, y] = getPosition(e);
+        sendData(15, x, y);
       }
   }
-
   </script>
 </html>
