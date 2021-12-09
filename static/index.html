@@ -65,7 +65,8 @@
   canvas.height = height;
   var player = new JSMpeg.Player(url, {
       canvas: canvas,
-      autoplay: true
+      autoplay: true,
+      audio: false
   });
 
   function handleMDown(e) {
