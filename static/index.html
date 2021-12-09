@@ -5,14 +5,11 @@
   </head>
   <style>
   body {
-    height: 100%;
     width: 100%;
     margin: 0;
   }
   canvas {
-    height: auto;
     width: 100%;
-    margin: 0;
   }
   </style>
   <body>
@@ -91,8 +88,8 @@
   }
 
   function handleDown(e) {
-      let [x, y] = [lastX, lastY] = getPosition(e);
-      mouseDown = true;
+      let [x, y] = getPosition(e);
+      mouseDown = true, lastX = x, lastY = y;
       sendData(14, x, y);
   }
 
