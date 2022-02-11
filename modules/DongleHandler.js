@@ -101,6 +101,12 @@ class DongleHandler extends EventEmitter {
         let yB = Buffer.alloc(4)
         let nothing = Buffer.alloc(4)
         actionB.writeUInt32LE(action)
+        if (x < 0) {
+            x = 0
+        }
+        if (y < 0) {
+            y = 0
+        }
         xB.writeUInt32LE(10000 * x)
         yB.writeUInt32LE(10000 * y)
         let message = [actionB, xB, yB, nothing]
