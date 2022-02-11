@@ -12,7 +12,7 @@ class AudioParse extends EventEmitter{
             "-f", "s16le",
             "-ac", "2",
             "-ar", `44100`,
-            "-nodisp"])
+            "-nodisp"], {env: {SDL_AUDIODRIVER: 'alsa', AUDIODEV: 'mid'}})
         this._parser.stderr.on('data', ((data) => {
             console.log(data.toString())
         }))
@@ -38,7 +38,7 @@ class AudioParse extends EventEmitter{
             "-f", "s16le",
             "-ac", "1",
             "-ar", `16000`,
-            "-nodisp"])
+            "-nodisp"], {env: {SDL_AUDIODRIVER: 'alsa', AUDIODEV: 'mid'}})
         this._parser2.stderr.on('data', ((data) => {
             console.log(data.toString())
         }))

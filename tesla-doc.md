@@ -559,7 +559,7 @@ AUDIODEV="mid"
 If auto-connecting does not work after reboot you may add the following line to `nano /etc/rc.local` before `exit`:
 
 ```
-echo -e "power on\connect AA:BB:CC:DD:EE:FF\n quit"|bluetoothctl
+echo -e "power on\nconnect AA:BB:CC:DD:EE:FF\n quit"|bluetoothctl
 ```
 
 
@@ -591,9 +591,12 @@ pm2 logs
 Enjoy
 ------
 
-- Reboot your raspberry so that everything starts correctly.
-- Connect your Tesla to the bluethoot of the rasberry from the bluetooth settings of the tesla.
-- Connect your Tesla to your Rasberry Wi-Fi.
-- Plug in your iPhone.
+- Reboot your raspberry so that everything starts correctly
+- Connect your Tesla to the bluethoot of the raspberry from the bluetooth settings of the tesla
+- Connect your Tesla to your Raspberry Wi-Fi
+- Plug in your iPhone
 - Open your browser to carplay.lan
 - Enjoy
+
+
+It was not easy, congratulations if it works, if you see bugs, or if you want to help the project, or if you simply have questions, it is with great pleasure. I'm still a beginner in ffmpeg and usb module for node, so it was not all repo! But it works!
