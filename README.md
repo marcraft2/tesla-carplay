@@ -1,4 +1,6 @@
 
+## Any contribution/bug report is highly appreciated. I am new to ffmpeg and USB protocol. 
+
 # Tesla Carplay
 
 This project allows you to have Carplay in the tesla browser with Raspberry Pi.
