@@ -104,7 +104,7 @@ Look at the ip address of your `eth0` ethernet interface :
 ```
 ip a
 ```
-It should look like 192.168.X.X or 10.X.X.X
+It should look like 192.168.X.X or 10.X.X.X on eth0
 
 At home I received this ip address 192.168.1.68, yours will certainly be different.
 
@@ -300,7 +300,7 @@ You are going to paste this :
 ```
 start 192.168.0.20
 end 192.168.0.50
-interface	wlan0
+interface wlan0
 remaining yes
 opt dns 192.168.0.254
 option subnet 255.255.255.0
@@ -394,8 +394,8 @@ Your file should look like this :
 auto wlan0
 iface wlan0 inet static
     address 192.168.0.254/24
-#    up iptables-restore < /etc/iptables.save
-#    up systemctl restart udhcpd
+    up iptables-restore < /etc/iptables.save
+    up systemctl restart udhcpd
 ```
 
 
@@ -449,7 +449,7 @@ Bluetooth connection | bluez-alsa
 ------
 
 ```
-apt install bluez bluez-tools libglib2.0-dev libasound2-dev build-essential autoconf libbluetooth-dev libtool libsbc-dev libdbus-1-dev -y
+apt install bluez bluez-tools libglib2.0-dev libasound2-dev build-essential autoconf libbluetooth-dev libtool libsbc-dev libdbus-1-dev ffmpeg -y
 cd && git clone https://github.com/Arkq/bluez-alsa.git
 cd bluez-alsa
 mkdir -p m4
@@ -462,18 +462,17 @@ adduser root audio
 ```
 
 
-You can startup bluealsa by it to `/etc/rc.local` before the exit line:
+You can startup bluealsa by it to `/etc/rc.local`:
 
 ```
 nano /etc/rc.local
 ```
 
-Now add
+Now add this before the exit line :
 ```
 export LIBASOUND_THREAD_SAFE=0
 /usr/bin/bluealsa -S &
 ```
-before the exit line.
 
 
 There is a `a2dp` plugin for our bluetooth agent. So we'll change the services' `ExecStart` parameter like so:
@@ -512,20 +511,18 @@ scan on
 discoverable on
 ```
 
-Go to your tesla in the bluetooth settings, to add a new device. Then select your rasberry, me it's called BlueZ 5.55
+Go to your tesla in the bluetooth settings, to add a new device. Then select your rasberry, me it's called `BlueZ 5.55`
 
 Answer us `yes` all the questions you ask the raspberry
 
 
-The `trust` command will enable to auto-pair the device again later on.
+The `trust` command will enable to auto-pair the device again later on. (replace the Bluetooth MAC address with that of your Tesla, it should be displayed when you have accepted the conncetion with `yes`)
 ```
 trust AA:BB:CC:DD:EE:FF
 exit
 ```
 
-Now create this file `/etc/asound.conf` like :
-
-
+Now create this file `/etc/asound.conf` (replace the Bluetooth MAC address with that of your Tesla, it should be displayed when you have accepted the conncetion with `yes`)
 ```
 pcm.mid {
  type plug
@@ -545,7 +542,6 @@ pcm.mid {
 
 We will now test the bluetooth:
 
-test
 ```
 wget http://cd.textfiles.com/10000soundssongs/WAV/BANJO.WAV
 SDL_AUDIODRIVER="alsa" AUDIODEV="mid" ffplay -nodisp -vn -autoexit -i BANJO.WAV
