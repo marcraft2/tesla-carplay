@@ -84,8 +84,8 @@ const config = {
         nightMode: 0,
         hand: 0,
         boxName: 'nodePlay',
-        width: 848,
-        height: 717,
+        width: 960,
+        height: 600,
         fps: 30,
 }
 

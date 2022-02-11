@@ -23,8 +23,8 @@
   </body>
   <script>
 
-  const carplayWidth = 848;
-  const carplayHeight = 717;
+  const carplayWidth = 960;
+  const carplayHeight = 600;
 
   const host = window.location.hostname + ':' + window.location.port;
   var height, width, lastX, lastY, mouseDown;
@@ -55,12 +55,12 @@
       autoplay: true,
       audio: false
   });
-    
+
   function getPosition(e) {
     let c = e.target.getBoundingClientRect();
     return [(e.clientX - c.left)/width, (e.clientY - c.top)/height];
   }
-    
+
   function sendData(type, x, y) {
     ws.send(JSON.stringify({
       type: 'click',

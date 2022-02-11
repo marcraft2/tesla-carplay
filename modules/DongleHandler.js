@@ -101,17 +101,6 @@ class DongleHandler extends EventEmitter {
         let yB = Buffer.alloc(4)
         let nothing = Buffer.alloc(4)
         actionB.writeUInt32LE(action)
-
-        console.log('x : ' +x);
-        console.log('y : ' +y);
-        if (x < 0) {
-          x = 0
-      }
-      if (y < 0) {
-          y = 0
-      }
-      console.log('x : ' +x);
-      console.log('y : ' +y);
         xB.writeUInt32LE(10000 * x)
         yB.writeUInt32LE(10000 * y)
         let message = [actionB, xB, yB, nothing]
@@ -234,8 +223,8 @@ class DongleHandler extends EventEmitter {
                     if(length > 0) {
                         this._audioParser.setActive(length)
                     } else {
-			                  console.log(data)
-		                }
+			console.log(data)
+		    }
                 } else {
                     let length = data.readUInt32LE(4)
                     this._messageHandler.parseHeader(type, length, data)

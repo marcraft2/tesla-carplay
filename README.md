@@ -8,17 +8,16 @@ This project allows you to have Carplay in the tesla browser with Raspberry Pi.
 [Youtube Link](https://youtu.be/6aNyr-Qt1Ts)
 
 ## How it works ?
-In fact, add a Raspberry Pi in the tesla, that allows us to create a wifi network so that the tesla can connect. In this Raspberry Pi we will also create a Web server with a stream for the video output of Carplay with WebSocket. The Carplay video stream is retrieved using a CarlinKit adapter. We then create a small html page on the web server, which allows this to connect to the stream with Websocket/JSMPEG, and send the touch gestures to control with WebSocket.
+In fact, add a Raspberry Pi into the tesla, this allows us to create a wifi network for the tesla to connect to. In this Raspberry Pi, we will also create a web server with a stream for Carplay video output with WebSocket. The Carplay video stream is retrieved using a CarlinKit adapter. We then create a small html page on the web server, which allows it to connect to the stream with Websocket/JSMPEG for video, and send touch gestures to control with WebSocket. For the sound, our rasberry pi can be connected in bluetooth to the tesla, because the browser does not allow the sound to pass while driving.
 
 
 ## About
 
-The project is not finished. You can find a [start of documentation](https://github.com/marcdubois71450/tesla-carplay/blob/master/tesla-doc.md) for the installation, with the necessary material.
-
+The project is not finished. You can find a [documentation](https://github.com/marcdubois71450/tesla-carplay/blob/master/tesla-doc.md) for the installation, with the necessary material.
 
 ## Problem
 
-- The tesla navigator mutes the sound, if the parking mode is removed. (One solution would be to go through Bluetooth, under test)
+- Tesla navigator mutes if parking mode is removed. So the sound must pass in Bluetooth
 - This solution requires a 4G subscription, however you no longer need to pay the tesla subscription, and you have Wi-Fi in your car.
 - The wireless Carplay does not work. (It's possible, I haven't had time to look yet)
 - You have to study whether the Tesla's usb port is disabled when you get out of the car, or if not, look at the long-term consumption.
