@@ -110,7 +110,7 @@ socketControl.on('connection', function(sControl, upgradeReq) {
       message = JSON.parse(message)
       if (message.type == 'click') {
         carplay.sendTouch(message.data.type, message.data.x, message.data.y)
-        console.log(message.data.type, message.data.x, message.data.y)
+        //console.log(message.data.type, message.data.x, message.data.y)
       } else if (message.type == 'statusReq') {
         if(carplay.getStatus()) {
             data = {
