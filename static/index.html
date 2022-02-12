@@ -60,7 +60,7 @@
 
   function getPosition(e) {
     let c = e.target.getBoundingClientRect();
-    if ("touchstart") {
+    if ("touchstart" == e.type) {
       return [(e.changedTouches[0].clientX - c.left)/width, (e.changedTouches[0].clientY - c.top)/height];
     }
     return [(e.clientX - c.left)/width, (e.clientY - c.top)/height];
