@@ -50,7 +50,6 @@
   var url = 'ws://' + host + '/ws/video';
   width = canvas.width = window.innerWidth;
   height = canvas.height = width * carplayHeight / carplayWidth;
-  console.log(height, width)
   var player = new JSMpeg.Player(url, {
       canvas: canvas,
       autoplay: true,
@@ -68,8 +67,6 @@
   }
 
   function sendData(type, x, y) {
-
-    console.log(type, x, y);
     ws.send(JSON.stringify({
       type: 'click',
       data: {type: type, x: x, y: y}
@@ -77,14 +74,12 @@
   }
 
   function handleMDown(e) {
-      console.log('here 004');
     let [x, y] = getPosition(e);
     mouseDown = true;
     sendData(14, x, y);
   }
 
   function handleMUp(e) {
-            console.log('here 003');
       let [x, y] = getPosition(e);
       mouseDown = false;
       sendData(16, x, y);
@@ -98,9 +93,7 @@
   }
 
   function handleDown(e) {
-      console.log('here 002');
       let [x, y] = getPosition(e);
-      console.log(x, y)
       mouseDown = true;
       lastX = x;
       lastY = y;
@@ -108,7 +101,6 @@
   }
 
   function handleUp(e) {
-      console.log('here 001');
       mouseDown = false;
       sendData(16, lastX, lastY);
   }
