@@ -50,18 +50,26 @@
   var url = 'ws://' + host + '/ws/video';
   width = canvas.width = window.innerWidth;
   height = canvas.height = width * carplayHeight / carplayWidth;
+  console.log(height, width)
   var player = new JSMpeg.Player(url, {
       canvas: canvas,
       autoplay: true,
       audio: false
   });
+  var lastX = 0;
+  var lastY = 0;
 
   function getPosition(e) {
     let c = e.target.getBoundingClientRect();
+    if ("touchstart") {
+      return [(e.changedTouches[0].clientX - c.left)/width, (e.changedTouches[0].clientY - c.top)/height];
+    }
     return [(e.clientX - c.left)/width, (e.clientY - c.top)/height];
   }
 
   function sendData(type, x, y) {
+
+    console.log(type, x, y);
     ws.send(JSON.stringify({
       type: 'click',
       data: {type: type, x: x, y: y}
@@ -69,12 +77,14 @@
   }
 
   function handleMDown(e) {
+      console.log('here 004');
     let [x, y] = getPosition(e);
     mouseDown = true;
     sendData(14, x, y);
   }
 
   function handleMUp(e) {
+            console.log('here 003');
       let [x, y] = getPosition(e);
       mouseDown = false;
       sendData(16, x, y);
@@ -88,12 +98,17 @@
   }
 
   function handleDown(e) {
+      console.log('here 002');
       let [x, y] = getPosition(e);
-      mouseDown = true, lastX = x, lastY = y;
+      console.log(x, y)
+      mouseDown = true;
+      lastX = x;
+      lastY = y;
       sendData(14, x, y);
   }
 
   function handleUp(e) {
+      console.log('here 001');
       mouseDown = false;
       sendData(16, lastX, lastY);
   }
