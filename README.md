@@ -28,7 +28,6 @@ The project is not finished. You can find a [documentation](https://github.com/m
 
 - Tesla navigator mutes if parking mode is removed. So the sound must pass in Bluetooth
 - This solution requires a 4G subscription, however you no longer need to pay the tesla subscription, and you have Wi-Fi in your car. (The tesla does not connect to your raspberry's Wi-Fi network if there is no internet access, you can however try ethernet at home)
-- The
 - You have to study whether the Tesla's usb port is disabled when you get out of the car, or if not, look at the long-term consumption.
 - Wifi stability, if your usb 3G/4G dongle loses its connection, your tesla will disconnect from your Wi-Fi (I haven't yet had the time to see if we can bypass the Tesla's wi-fi security system)
 
