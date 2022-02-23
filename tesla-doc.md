@@ -2,7 +2,7 @@
 ## Installation guide for tesla navigator
 
 
-We are going to create a Wifi networks from a Raspberry Pi and a 4G chip. Tesla will connect to this WiFi networks, and Carplay will be available through a website hosted on the Raspberry Pi in the tesla browser.
+We are going to create a Wifi networks from a Raspberry Pi and a 4G chip. Tesla will connect to this WiFi networks, and Carplay will be available through a website hosted on the Raspberry Pi in the tesla browser. And the sound will go through bluetooth.
 
 
 Requirement
@@ -48,8 +48,8 @@ Attention the keyboard is a QWERTY! (It is not necessary to change, we have very
 First, we will make all the updates available. (Typing is command followed by entering)
 
 ```
-apt install update
-apt install upgrade -y
+sudo apt install update
+sudo apt install upgrade -y
 ```
 
 Config raspi os :
