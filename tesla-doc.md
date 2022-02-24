@@ -449,7 +449,7 @@ Bluetooth connection | bluez-alsa
 ------
 
 ```
-apt install bluez bluez-tools libglib2.0-dev libasound2-dev build-essential autoconf libbluetooth-dev libtool libsbc-dev libdbus-1-dev libspandsp-dev ffmpeg -y
+apt install bluez bluez-tools git libglib2.0-dev libasound2-dev build-essential autoconf libbluetooth-dev libtool libsbc-dev libdbus-1-dev libspandsp-dev ffmpeg -y
 cd && git clone https://github.com/Arkq/bluez-alsa.git
 cd bluez-alsa
 mkdir -p m4
