@@ -2,6 +2,7 @@
   "name": "tesla-carplay",
   "author": "Marc Dubois",
   "dependencies": {
-    "ws": "^8.2.3"
+    "ws": "^8.2.3",
+    "usb": "^2.1.2"
   }
 }

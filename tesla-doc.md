@@ -587,6 +587,8 @@ For check log
 pm2 logs
 ```
 
+If you open Carplay in a browser on a computer, you must simulate a touch screen, otherwise you cannot control Carplay.
+
 
 Enjoy
 ------

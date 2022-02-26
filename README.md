@@ -22,7 +22,8 @@ In fact, add a Raspberry Pi into the tesla, this allows us to create a wifi netw
 
 ## About
 
-The project is not finished. You can find a [documentation](https://github.com/marcdubois71450/tesla-carplay/blob/master/tesla-doc.md) for the installation, with the necessary material.
+- You can find a [documentation](https://github.com/marcdubois71450/tesla-carplay/blob/master/tesla-doc.md) for the installation, with the necessary material.
+- If you open Carplay in a browser on a computer, you must simulate a touch screen, otherwise you cannot control Carplay.
 
 ## Problem
 
