@@ -6,7 +6,7 @@ This project allows you to have Carplay in the tesla browser with Raspberry Pi.
 ## Demo
 
 - Youtube [link #1](https://youtu.be/6aNyr-Qt1Ts) old
-- Youtube [link #2](https://youtu.be/6aNyr-Qt1Ts)
+- Youtube [link #2](https://youtu.be/omYd29-GwQ8)
 - Twitter [link](https://twitter.com/Marc20Dubois/status/1505594169959632899)
 
 ## How it works ?
