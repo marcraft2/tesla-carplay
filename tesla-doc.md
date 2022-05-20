@@ -17,8 +17,23 @@ Requirement
  - Ethernet with internet
  - USB-C Cable for power supply.
 
+*(It is also possible to replace the 4G adapter and the sim card, by a telephone connection sharing. This tutorial is not that solution at the moment)*
 
-OS Installation | Debian
+Tesla Security
+------
+ - You cannot connect with your tesla to a Wi-Fi network that does not have internet access. We therefore need 3G/4G internet access.
+ - Tesla's browser blocks access to the website which is located on a private IP address (192.168.X.X, 10.X.X.X, 172.X.X.X). We can bypass this security with IPTABLES
+
+ ```
+ iptables -t nat -A PREROUTING -d 1.1.1.1 -i wlan0 -p tcp --dport 80 -j DNAT --to-destination 192.168.0.254
+ iptables -t nat -A PREROUTING -d 1.1.1.1 -i wlan0 -p udp --dport 80 -j DNAT --to-destination 192.168.0.254
+ iptables -t nat -A POSTROUTING -s 192.168.0.254 -p tcp --dport 80 -j SNAT --to-source 1.1.1.1
+ iptables -t nat -A POSTROUTING -s 192.168.0.254 -p udp --dport 80 -j SNAT --to-source 1.1.1.1
+ ```
+
+
+
+OS Installation | Raspberry Pi OS (Debian based)
 ------
 
 Insert the Micro SD Card into your computer.
@@ -43,7 +58,7 @@ password : `raspberry`
 
 You are now connected to a command terminal, with that we will be able to control your Raspberry Pi.
 
-Attention the keyboard is a QWERTY! (It is not necessary to change, we have very little to do, adapt you)
+Warning: the keyboard is a QWERTY on startup!
 
 First, we will make all the updates available. (Typing is command followed by entering)
 
@@ -218,6 +233,8 @@ You can now save the file with `CTRL + O` then `Enter`. And quit `nano` text edi
 We restart the software for the new configuration under apply with :
 
 ```
+systemctl unmask hostapd
+systemctl enable hostapd
 systemctl restart hostapd
 ```
 
@@ -483,8 +500,21 @@ nano /etc/systemd/system/bluetooth.target.wants/bluetooth.service
 And while we're here we'll disable sap since this may cause some errors:
 
 ```
-ExecStart=/usr/lib/bluetooth/bluetoothd --noplugin=sap --plugin=a2dp
+ExecStart=/usr/libexec/bluetooth/bluetoothd --noplugin=sap --plugin=a2dp
 ```
+
+Rename raspberry pi bluetooth name:  
+```
+nano /etc/systemd/system/bluetooth.target.wants/bluetooth.service
+```
+Remove `#` in front of `Name` (line 5), and set it to whatever you want, I'll use `Carplay` :
+
+```
+[...]
+Name = CarPlay
+[...]
+```
+
 
 Now reload and restart the agent:
 ```
@@ -511,18 +541,18 @@ scan on
 discoverable on
 ```
 
-Go to your tesla in the bluetooth settings, to add a new device. Then select your rasberry, me it's called `BlueZ 5.55`
+Go to your tesla in the bluetooth settings, to add a new device. Then select your raspberry, me it's called `CarPlay`
 
 Answer us `yes` all the questions you ask the raspberry
 
 
-The `trust` command will enable to auto-pair the device again later on. (replace the Bluetooth MAC address with that of your Tesla, it should be displayed when you have accepted the conncetion with `yes`)
+The `trust` command will enable to auto-pair the device again later on. (replace the Bluetooth MAC address with that of your Tesla, it should be displayed when you have accepted the connection with `yes`)
 ```
 trust AA:BB:CC:DD:EE:FF
 exit
 ```
 
-Now create this file `/etc/asound.conf` (replace the Bluetooth MAC address with that of your Tesla, it should be displayed when you have accepted the conncetion with `yes`)
+Now create this file `/etc/asound.conf` (replace the Bluetooth MAC address with that of your Tesla, it should be displayed when you have accepted the connection with `yes`)
 ```
 pcm.mid {
  type plug
@@ -594,7 +624,7 @@ Enjoy
 ------
 
 - Reboot your raspberry so that everything starts correctly
-- Connect your Tesla to the bluethoot of the raspberry from the bluetooth settings of the tesla
+- Connect your Tesla to the bluetooth of the raspberry from the bluetooth settings of the tesla
 - Connect your Tesla to your Raspberry Wi-Fi
 - Plug in your iPhone
 - Open your browser to carplay.lan
