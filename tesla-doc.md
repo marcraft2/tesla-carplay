@@ -73,10 +73,10 @@ raspi-config
 ```
 use `pi` like default
 
-Select `Localisation Options` => `Locale` => Select the right option
-Select `Localisation Options` => `Timezone` => Select the right option
-Select `Localisation Options` => `Keyboard` => Select the right option
-Select `Localisation Options` => `WLAN Country` => Select the right option
+- Select `Localisation Options` => `Locale` => Select the right option
+- Select `Localisation Options` => `Timezone` => Select the right option
+- Select `Localisation Options` => `Keyboard` => Select the right option
+- Select `Localisation Options` => `WLAN Country` => Select the right option
 
 
 Enable SSH
