@@ -1,7 +1,7 @@
 
 # Tesla Carplay
 
-This project allows you to have Carplay in the tesla browser with Raspberry Pi.
+This project allows you to have Carplay in the tesla browser with Raspberry Pi 4.
 
 ## Demo
 
