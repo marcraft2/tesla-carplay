@@ -80,12 +80,12 @@ streamServer.listen(STREAM_PORT);
 // -----------------------------------------------------------------------------
 
 const config = {
-        dpi: 15,
+        dpi: 100,
         nightMode: 0,
         hand: 0,
         boxName: 'nodePlay',
-        width: 960,
-        height: 600,
+        width: 900,
+        height: 702,
         fps: 30,
 }
 
