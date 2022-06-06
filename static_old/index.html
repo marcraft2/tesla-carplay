@@ -1,0 +1,115 @@
+<html>
+  <head>
+    <title>Carplay</title>
+    <script type="text/javascript" src="./jsmpeg.min.js"></script>
+  </head>
+  <style>
+  body {
+    width: 100%;
+    margin: 0;
+  }
+  canvas {
+    width: 100%;
+  }
+  </style>
+  <body>
+    <canvas id="carplay"
+            ontouchstart="handleDown(event)"
+            ontouchend="handleUp(event)"
+            ontouchmove="handleMove(event)"
+            onmousedown="handleMDown(event)"
+            onmouseup="handleMUp(event)"
+            onmousemove="handleMMove(event)"></canvas>
+  </body>
+  <script>
+
+  const carplayWidth = 1000;
+  const carplayHeight = 720;
+
+  const host = window.location.hostname + ':' + window.location.port;
+  var height, width, lastX, lastY, mouseDown;
+
+  var ws = new WebSocket('ws://'+host+'/ws/control');
+  ws.onopen = function () {
+      ws.send(JSON.stringify({
+        type: 'statusReq'
+      }))
+  }
+  ws.onmessage = function (message) {
+      message = JSON.parse(message.data)
+      if (message.type == 'statusReq') {
+            if (message.data == 'plugged') {
+              console.log('IPhone plugged');
+            } else if (message.data == 'unplugged') {
+              console.log('IPhone unplugged');
+            }
+      }
+  }
+
+  var canvas = document.getElementById('carplay');
+  var url = 'ws://' + host + '/ws/video';
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = width * carplayHeight / carplayWidth;
+  var player = new JSMpeg.Player(url, {
+      canvas: canvas,
+      autoplay: true,
+      audio: false
+  });
+  var lastX = 0;
+  var lastY = 0;
+
+  function getPosition(e) {
+    let c = e.target.getBoundingClientRect();
+    if ("touchstart" == e.type || "touchmove" == e.type) {
+      return [(e.changedTouches[0].clientX - c.left)/width, (e.changedTouches[0].clientY - c.top)/height];
+    }
+    return [(e.clientX - c.left)/width, (e.clientY - c.top)/height];
+  }
+
+  function sendData(type, x, y) {
+    ws.send(JSON.stringify({
+      type: 'click',
+      data: {type: type, x: x, y: y}
+    }));
+  }
+
+  function handleMDown(e) {
+    let [x, y] = getPosition(e);
+    mouseDown = true;
+    sendData(14, x, y);
+  }
+
+  function handleMUp(e) {
+      let [x, y] = getPosition(e);
+      mouseDown = false;
+      sendData(16, x, y);
+  }
+
+  function handleMMove(e) {
+      if (mouseDown) {
+        let [x, y] = getPosition(e);
+        sendData(15, x, y);
+      }
+  }
+
+  function handleDown(e) {
+      let [x, y] = getPosition(e);
+      mouseDown = true;
+      lastX = x;
+      lastY = y;
+      sendData(14, x, y);
+  }
+
+  function handleUp(e) {
+      mouseDown = false;
+      sendData(16, lastX, lastY);
+  }
+
+  function handleMove(e) {
+      if (mouseDown) {
+        let [x, y] = getPosition(e);
+        sendData(15, x, y);
+      }
+  }
+  </script>
+</html>

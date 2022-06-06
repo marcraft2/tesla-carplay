@@ -11,14 +11,14 @@ class MessageHandler {
             12: this.parse12,
             2: this.parse2,
             4: this.parse4,
-	          0: this.parse0
+	    0: this.parse0
         };
         this.update = updateState;
         this.bytesToRead = 0;
         this.bytesRead = 0;
         this.bytes = []
         this.plugged = plugged;
-	      this.quit = quit;
+	this.quit = quit;
     }
 
     callFunction = (data) => {
@@ -44,12 +44,12 @@ class MessageHandler {
             case 4:
                 this.parse4()
                 break
-      	    case 0:
-        		    this.parse0()
-                console.log("received 0", data)
-  		          break
-            default:
-                break
+	    case 0:
+		    this.parse0()
+            console.log("received 0", data)
+		    break
+        default:
+            break
         }
     }
 
@@ -107,6 +107,9 @@ class MessageHandler {
         if(!(value[message])) {
             console.log("test message", data.toString('ascii'))
         }
+        if(data.readUInt32LE() === 3) {
+            this.quit()
+        }
         this.update(0)
     }
 
@@ -152,7 +155,6 @@ class MessageHandler {
     parse0 = (data) => {
         console.log("received 0 event")
         console.log(data)
-        this.quit()
         this.update(0)
     }
 }

@@ -4,10 +4,9 @@ const EventEmitter = require('events');
 const VideoParser = require('./VideoParseWS')
 const AudioParser = require('./AudioParse')
 const MessageHandler = require('./MessageHandler')
-const Microphone = require('./Microphone')
 
 class DongleHandler extends EventEmitter {
-    constructor({dpi=160, nightMode=0, hand=0, boxName="nodePlay", width=800, height=640, fps=20, micConfig={}, audioEnv={}},reader) {
+    constructor({dpi=160, nightMode=0, hand=0, boxName="nodePlay", width=800, height=640, fps=20}) {
         super();
         this._usb = usb;
         this._dpi = dpi;
@@ -17,8 +16,6 @@ class DongleHandler extends EventEmitter {
         this._width = width;
         this._height = height;
         this._fps = fps;
-        this._micConfig = micConfig;
-        this._audioEnv = audioEnv;
         this._device = null;
         this._assets = ["adb", "adb.pub", "helloworld0", "helloworld1", "helloworld2", "libby265n.so", "libby265n_x86.so", "libscreencap40.so", "libscreencap41.so", "libscreencap43.so", "libscreencap50.so", "libscreencap50_x86.so", "libscreencap442.so", "libscreencap422.so", "mirrorcoper.apk", "libscreencap60.so", "libscreencap70.so", "libscreencap71.so", "libscreencap80.so", "libscreencap90.so", "HWTouch.dex"]
         this._magic = "aa55aa55";
@@ -27,43 +24,25 @@ class DongleHandler extends EventEmitter {
         this._interface = null;
         this._inEP = null;
         this._outEP = null;
-        this._mic = new Microphone(this._micConfig)
-        this._videoParser = new VideoParser(this._width, this._height, 2000, "http://localhost:8081/supersecret", this.updateState, reader)
-        this._audioParser = new AudioParser(this.updateState, this._mic, this._audioEnv)
+        this._videoParser = new VideoParser(this._width, this._height, 2000, "http://localhost:8081/supersecret", this.updateState)
+        this._audioParser = new AudioParser(this.updateState)
         this._messageHandler = new MessageHandler(this.updateState, this.setPlugged, this.quit)
-        this._mic.on('data', (data) => {
-            if(this._mic.active) {
-                let audioData = Buffer.alloc(12)
-                audioData.writeUInt32LE(5, 0)
-                audioData.writeFloatLE(0.0, 4)
-                audioData.writeUInt32LE(3, 8)
-                this.serialise(Buffer.concat([audioData, data]), 7)
-            }
-        })
         this.plugged = false;
-        this.time;
-        this.enablePair = false;
-        this.pairTimeout;
-        this.lag = 0;
         this._keys = {
             invalid: 0, //'invalid',
             siri: 5, //'Siri Button',
-            mic: 7, //'Car Microphone',
+            mic: 6, //'Car Microphone',
             left: 100, //'Button Left',
             right: 101, //'Button Right',
-            frame: 12,
-            selectDown: 104, //'Button Select Down',
-            selectUp: 105, //'Button Select Up',
+            selectUp: 104, //'Button Select Down',
+            selectDown: 105, //'Button Select Up',
             back: 106, //'Button Back',
-            down: 114, //'Button Down',
-            home: 200, //'Button Home',
+            up: 114, //'Button Down',
+            down: 200, //'Button Home',
             play: 201, //'Button Play',
             pause: 202, //'Button Pause',
             next: 204, //'Button Next Track',
-            prev: 205, //'Button Prev Track',
-            wifiEn: 1000,
-            wifiPair: 1012,
-            wifiConnect: 1002
+            prev: 205 //'Button Prev Track',
         }
         if(this.getDevice()) {
             console.log("device connected and ready")
@@ -71,25 +50,7 @@ class DongleHandler extends EventEmitter {
             console.log("device not connected")
         }
 
-        setTimeout(() => {
-            setInterval(() => {
-                if(this.plugged) {
-                    console.log('requesting key frame')
-                    this.sendKey('frame')
-                }
-            }, 1000)
-        }, 15000)
 
-
-    }
-
-    measureLag(iteration) {
-        const start = new Date()
-        setTimeout(() => {
-            this.lag = new Date() - start
-            //console.log("lag was: ", this.lag)
-            this.measureLag(iteration + 1) // Recurse
-        })
     }
 
     getDevice = () => {
@@ -140,6 +101,12 @@ class DongleHandler extends EventEmitter {
         let yB = Buffer.alloc(4)
         let nothing = Buffer.alloc(4)
         actionB.writeUInt32LE(action)
+        if (x < 0) {
+            x = 0
+        }
+        if (y < 0) {
+            y = 0
+        }
         xB.writeUInt32LE(10000 * x)
         yB.writeUInt32LE(10000 * y)
         let message = [actionB, xB, yB, nothing]
@@ -158,22 +125,8 @@ class DongleHandler extends EventEmitter {
 
         await this.sendInt(0, "/tmp/night_mode");
         await this.sendInt(0, "/tmp/hand_drive_mode");
-        await this.sendInt(1, "/tmp/charge_mode");
+        await this.sendInt(0, "/tmp/charge_mode");
         await this.sendString(this._boxName, "/etc/box_name");
-        await this.sendKey('wifiEn')
-        await this.sendKey('wifiConnect')
-        setTimeout(() => {
-            console.log("enabling wifi")
-            this.sendKey('wifiEnd')
-            setTimeout(() => {
-                console.log("auto connecting")
-                this.sendKey('wifiConnect')
-            },1000)
-        }, 2000)
-        this.pairTimeout = setTimeout(() => {
-            console.log("no device, sending pair")
-            this.sendKey("wifiPair")
-        }, 15000)
 
         setInterval(() => {
             this.heartBeat()
@@ -202,7 +155,6 @@ class DongleHandler extends EventEmitter {
 
     setPlugged = (state) => {
         this.plugged = state;
-        clearTimeout(this.pairTimeout)
         this.emit("status", {status: this.plugged})
     }
 
@@ -269,15 +221,7 @@ class DongleHandler extends EventEmitter {
         if(this._state ===0) {
             if((Buffer.compare(this._magicBuff, header)) === 0) {
                 let type = data[8]
-                let duration = 0
                 if(type === 6) {
-                    // if(!(this.time)) {
-                    //     this.time = new Date().getTime()
-                    // } else {
-                    //     let now = new Date().getTime()
-                    //     duration = (now - this.time)// + this.lag
-                    //     this.time = now
-                    // }
                     let length = data.readUInt32LE(4)
                     this._videoParser.setActive(length)
                 } else if (type ===7) {
@@ -285,8 +229,8 @@ class DongleHandler extends EventEmitter {
                     if(length > 0) {
                         this._audioParser.setActive(length)
                     } else {
-
-                        }
+              			     console.log(data)
+              		  }
                 } else {
                     let length = data.readUInt32LE(4)
                     this._messageHandler.parseHeader(type, length, data)
