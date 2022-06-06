@@ -574,7 +574,7 @@ Now reboot
 reboot
 ```
 
-And we will now test the bluetooth:
+Reconnect bluetooth from your tesla screen after restarting and we will now test the bluetooth:
 
 ```
 wget http://cd.textfiles.com/10000soundssongs/WAV/BANJO.WAV
