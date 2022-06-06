@@ -7,8 +7,8 @@ We are going to create a Wifi networks from a Raspberry Pi and a 4G chip. Tesla 
 
 Requirement
 ------
- - Raspberry Pi 4 Modèle B (test with 8GB Ram model)
- - Micro SD Card for Raspberry Pi 4 Modèle B
+ - Raspberry Pi 4 (recommended) or Raspberry Pi 3
+ - Micro SD Card
  - 4G USB Key (test with Huawei E3372)
  - SIM card with 4G
  - Carlinkit (test with CPC200)
@@ -17,20 +17,7 @@ Requirement
  - Ethernet with internet
  - USB-C Cable for power supply.
 
-*(It is also possible to replace the 4G adapter and the sim card, by a telephone connection sharing. This tutorial is not that solution at the moment)*
-
-Tesla Security
-------
- - You cannot connect with your tesla to a Wi-Fi network that does not have internet access. We therefore need 3G/4G internet access.
- - Tesla's browser blocks access to the website which is located on a private IP address (192.168.X.X, 10.X.X.X, 172.X.X.X). We can bypass this security with IPTABLES
-
- ```
- iptables -t nat -A PREROUTING -d 1.1.1.1 -i wlan0 -p tcp --dport 80 -j DNAT --to-destination 192.168.0.254
- iptables -t nat -A PREROUTING -d 1.1.1.1 -i wlan0 -p udp --dport 80 -j DNAT --to-destination 192.168.0.254
- iptables -t nat -A POSTROUTING -s 192.168.0.254 -p tcp --dport 80 -j SNAT --to-source 1.1.1.1
- iptables -t nat -A POSTROUTING -s 192.168.0.254 -p udp --dport 80 -j SNAT --to-source 1.1.1.1
- ```
-
+*(It is also possible to replace the 4G adapter and the sim card, by a telephone connection sharing. This tutorial is not that solution at the moment. And wireless carplay does not allow Wi-Fi connection sharing to be used at the same time.)*
 
 
 OS Installation | Raspberry Pi OS (Debian based)
@@ -52,8 +39,8 @@ Prepare your 4G dongle on another device, setting up the pin code is all it take
 
 You can now insert your Micro SD Card in your Raspberry Pi, connect a keyboard, ethernet cable, 4G Dongle as well as a screen. Then the power cable. Wait while Debian starts up.
 
-user : `pi`
-password : `raspberry`
+- user : `pi`
+- password : `raspberry`
 
 
 You are now connected to a command terminal, with that we will be able to control your Raspberry Pi.
@@ -452,6 +439,7 @@ server {
     }
 }
 ```
+You can now save the file with `CTRL + O` then `Enter`. And quit `nano` text editor with `CTRL + X`
 
 
 We restart the software for the new configuration under apply with :
@@ -459,7 +447,6 @@ We restart the software for the new configuration under apply with :
 systemctl enable nginx
 systemctl restart nginx
 ```
-You can now save the file with `CTRL + O` then `Enter`. And quit `nano` text editor with `CTRL + X`
 
 
 Bluetooth connection | bluez-alsa
@@ -552,9 +539,9 @@ trust AA:BB:CC:DD:EE:FF
 exit
 ```
 
-Now create this file `/etc/asound.conf` (replace the Bluetooth MAC address with that of your Tesla, it should be displayed when you have accepted the connection with `yes`)
+Now create this file `/etc/asound.conf` to set the tesla as the default audio device on the alsa audio controller. (replace the Bluetooth MAC address with that of your Tesla, it should be displayed when you have accepted the connection with `yes`)
 ```
-pcm.mid {
+pcm.!default {
  type plug
  slave {
      pcm {
@@ -570,23 +557,34 @@ pcm.mid {
 }
 ```
 
-We will now test the bluetooth:
-
-```
-wget http://cd.textfiles.com/10000soundssongs/WAV/BANJO.WAV
-SDL_AUDIODRIVER="alsa" AUDIODEV="mid" ffplay -nodisp -vn -autoexit -i BANJO.WAV
-```
-This is the music of victory.
-
 Setup on reboot, for this edit `/etc/environment`
 
 ```
 SDL_AUDIODRIVER="alsa"
-AUDIODEV="mid"
 ```
 
+And apply this command :
+```
+alsactl init
+```
+(Do not pay attention to the message that it returns to you, it is very often an error for another interface)
 
-If auto-connecting does not work after reboot you may add the following line to `nano /etc/rc.local` before `exit`:
+Now reboot
+```
+reboot
+```
+
+And we will now test the bluetooth:
+
+```
+wget http://cd.textfiles.com/10000soundssongs/WAV/BANJO.WAV
+ffplay -nodisp -vn -autoexit -i BANJO.WAV
+```
+This is the music of victory.
+
+You can either play with the auto connection in your tesla settings, or you can do this if that's not enough:
+
+Add the following line to `nano /etc/rc.local` before `exit`:
 
 ```
 echo -e "power on\nconnect AA:BB:CC:DD:EE:FF\n quit"|bluetoothctl
@@ -631,4 +629,17 @@ Enjoy
 - Enjoy
 
 
-It was not easy, congratulations if it works, if you see bugs, or if you want to help the project, or if you simply have questions, it is with great pleasure. I'm still a beginner in ffmpeg and usb module for node, so it was not all repo! But it works!
+It was not easy, congratulations if it works, if you see bugs, or if you want to help the project, or if you simply have questions, it is with great pleasure.
+
+
+About Tesla Security
+------
+ - You cannot connect with your tesla to a Wi-Fi network that does not have internet access. We therefore need 3G/4G internet access.
+ - Tesla's browser blocks access to the website which is located on a private IP address (192.168.X.X, 10.X.X.X, 172.X.X.X). We can bypass this security with IPTABLES
+
+ ```
+ iptables -t nat -A PREROUTING -d 1.1.1.1 -i wlan0 -p tcp --dport 80 -j DNAT --to-destination 192.168.0.254
+ iptables -t nat -A PREROUTING -d 1.1.1.1 -i wlan0 -p udp --dport 80 -j DNAT --to-destination 192.168.0.254
+ iptables -t nat -A POSTROUTING -s 192.168.0.254 -p tcp --dport 80 -j SNAT --to-source 1.1.1.1
+ iptables -t nat -A POSTROUTING -s 192.168.0.254 -p udp --dport 80 -j SNAT --to-source 1.1.1.1
+ ```

@@ -1,9 +1,9 @@
 {
   "name": "tesla-carplay",
   "author": "Marc Dubois",
-  "version": "0.2",
+  "version": "0.3",
   "dependencies": {
-    "ws": "^8.2.3",
-    "usb": "^2.1.2"
+    "node-carplay": "^2.0.9",
+    "ws": "^8.2.3"
   }
 }

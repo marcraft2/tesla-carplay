@@ -1,28 +1,34 @@
 <html>
   <head>
     <title>Carplay</title>
-    <script type="text/javascript" src="./jsmpeg.min.js"></script>
+    <script type="text/javascript" src="./jmuxer.min.js"></script>
   </head>
   <style>
   body {
     width: 100%;
     margin: 0;
   }
-  canvas {
+  video {
+    width: 100%;
+  }
+  .carplay {
+    height: 100%;
     width: 100%;
   }
   </style>
   <body>
-    <canvas id="carplay"
-            ontouchstart="handleDown(event)"
-            ontouchend="handleUp(event)"
-            ontouchmove="handleMove(event)"
-            onmousedown="handleMDown(event)"
-            onmouseup="handleMUp(event)"
-            onmousemove="handleMMove(event)"></canvas>
+    <div id="carplay"
+            ontouchstart="handleTouchStart(event)"
+            ontouchend="handleTouchEnd(event)"
+            ontouchmove="handleTouchMove(event)"
+            onmousedown="handleMouseDown(event)"
+            onmouseup="handleMouseUp(event)"
+            onmousemove="handleMouseMove(event)">
+            <video autoPlay muted id="player" />
+    </div>
   </body>
   <script>
-
+  var jmuxer;
   const carplayWidth = 900;
   const carplayHeight = 702;
 
@@ -31,37 +37,62 @@
 
   var ws = new WebSocket('ws://'+host+'/ws/control');
   ws.onopen = function () {
-      ws.send(JSON.stringify({
-        type: 'statusReq'
-      }))
+      ws.send(JSON.stringify({type: 'statusReq'}))
   }
-  ws.onmessage = function (message) {
-      message = JSON.parse(message.data)
-      if (message.type == 'statusReq') {
-            if (message.data == 'plugged') {
+  ws.onmessage = function (msg) {
+      msg = JSON.parse(msg.data);
+      switch (msg.type) {
+        case 'statusReq':
+          switch (msg.data) {
+            case 'plugged':
               console.log('IPhone plugged');
-            } else if (message.data == 'unplugged') {
+              break;
+            case 'unplugged':
               console.log('IPhone unplugged');
-            }
-      }
+              break;
+            default:
+              console.log(`Unknown message data: ${msg.type} ${msg.data}`);
+          };
+          break;
+        default:
+          console.log(`Unknown message type: ${msg.type}`);
+      };
   }
 
-  var canvas = document.getElementById('carplay');
-  var url = 'ws://' + host + '/ws/video';
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = width * carplayHeight / carplayWidth;
-  var player = new JSMpeg.Player(url, {
-      canvas: canvas,
-      autoplay: true,
-      audio: false
-  });
+  var player = document.getElementById('player');
+  width = player.width = window.innerWidth;
+  height = player.height = width * carplayHeight / carplayWidth;
   var lastX = 0;
   var lastY = 0;
+
+  var socketURL = 'ws://' + host + '/ws/video';
+  jmuxer = new JMuxer({
+    node: 'player',
+    mode: 'video',
+    flushingTime: 1000,
+    maxDelay: 100,
+    fps: 30,
+    debug: true
+  });
+
+  var wsVideo = new WebSocket(socketURL);
+  wsVideo.binaryType = 'arraybuffer';
+  wsVideo.addEventListener('message',function(event) {
+    jmuxer.feed({
+      video: new Uint8Array(event.data)
+    });
+  });
+
+  wsVideo.addEventListener('error', function(e) {
+    console.log('Video Socket Error');
+  });
+
 
   function getPosition(e) {
     let c = e.target.getBoundingClientRect();
     if ("touchstart" == e.type || "touchmove" == e.type) {
-      return [(e.changedTouches[0].clientX - c.left)/width, (e.changedTouches[0].clientY - c.top)/height];
+      return [(e.changedTouches[0].clientX - c.left)/width,
+              (e.changedTouches[0].clientY - c.top)/height];
     }
     return [(e.clientX - c.left)/width, (e.clientY - c.top)/height];
   }
@@ -73,26 +104,26 @@
     }));
   }
 
-  function handleMDown(e) {
+  function handleMouseDown(e) {
     let [x, y] = getPosition(e);
     mouseDown = true;
     sendData(14, x, y);
   }
 
-  function handleMUp(e) {
+  function handleMouseUp(e) {
       let [x, y] = getPosition(e);
       mouseDown = false;
       sendData(16, x, y);
   }
 
-  function handleMMove(e) {
+  function handleMouseMove(e) {
       if (mouseDown) {
         let [x, y] = getPosition(e);
         sendData(15, x, y);
       }
   }
 
-  function handleDown(e) {
+  function handleTouchStart(e) {
       let [x, y] = getPosition(e);
       mouseDown = true;
       lastX = x;
@@ -100,16 +131,17 @@
       sendData(14, x, y);
   }
 
-  function handleUp(e) {
+  function handleTouchEnd(e) {
       mouseDown = false;
       sendData(16, lastX, lastY);
   }
 
-  function handleMove(e) {
+  function handleTouchMove(e) {
       if (mouseDown) {
         let [x, y] = getPosition(e);
         sendData(15, x, y);
       }
   }
+
   </script>
 </html>
