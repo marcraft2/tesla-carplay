@@ -8,23 +8,24 @@
     width: 100%;
     margin: 0;
   }
-  video {
-    width: 100%;
-  }
-  .carplay {
+  #carplay {
     height: 100%;
+    width: 100%;
+    margin: 0;
+  }
+  video {
     width: 100%;
   }
   </style>
   <body>
     <div id="carplay"
-            ontouchstart="handleTouchStart(event)"
-            ontouchend="handleTouchEnd(event)"
-            ontouchmove="handleTouchMove(event)"
-            onmousedown="handleMouseDown(event)"
-            onmouseup="handleMouseUp(event)"
-            onmousemove="handleMouseMove(event)">
-            <video autoPlay muted id="player" />
+         ontouchstart="handleTouchStart(event)"
+         ontouchend="handleTouchEnd(event)"
+         ontouchmove="handleTouchMove(event)"
+         onmousedown="handleMouseDown(event)"
+         onmouseup="handleMouseUp(event)"
+         onmousemove="handleMouseMove(event)">
+          <video autoPlay muted id="player" />
     </div>
   </body>
   <script>
