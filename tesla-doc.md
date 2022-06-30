@@ -492,7 +492,7 @@ ExecStart=/usr/libexec/bluetooth/bluetoothd --noplugin=sap --plugin=a2dp
 
 Rename raspberry pi bluetooth name:  
 ```
-nano /etc/systemd/system/bluetooth.target.wants/bluetooth.service
+nano /etc/bluetooth/main.conf
 ```
 Remove `#` in front of `Name` (line 5), and set it to whatever you want, I'll use `Carplay` :
 
