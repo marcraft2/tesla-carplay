@@ -1,6 +1,5 @@
-var fs = require('fs')
-var ws = require('ws')
-var http = require('http')
+const express = require("express");
+const ws = require('ws')
 const { Readable } = require('stream');
 const Carplay = require('node-carplay')
 const url = require('url')
@@ -32,11 +31,15 @@ const carplay = new Carplay(config, mp4Reader)
 //                             INIT WEB SERVER
 // -----------------------------------------------------------------------------
 
+const port = 8080;
+const app = express();
+app.use(express.static("./static"));
+const httpServer = app.listen(port, () =>
+  console.log(`Listening on port: ${port}`)
+);
+
 var WS_CONTROL_ENDPOINT = '/control'
 var WS_VIDEO_ENDPOINT = '/video'
-
-var httpServer = http.createServer();
-httpServer.listen(8080, '0.0.0.0');
 
 const socketVideo = new ws.Server({ noServer: true });
 const socketControl = new ws.Server({ noServer: true });
