@@ -5,6 +5,7 @@
   "dependencies": {
     "express": "^4.18.1",
     "node-carplay": "^2.0.9",
+    "pubsub-js": "^1.9.4",
     "usb": "^2.5.0",
     "ws": "^8.2.3"
   }

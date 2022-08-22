@@ -6,6 +6,16 @@ const url = require('url')
 
 
 // -----------------------------------------------------------------------------
+//                              INIT MJPEG
+// -----------------------------------------------------------------------------
+
+const { spawn } = require("child_process");
+const PubSub = require("pubsub-js");
+const boundaryID = "BOUNDRY";
+var chunks = Buffer.from([])
+var connections = 0
+
+// -----------------------------------------------------------------------------
 //                              INIT CARPLAY
 // -----------------------------------------------------------------------------
 
@@ -37,6 +47,35 @@ app.use(express.static("./static"));
 const httpServer = app.listen(port, () =>
   console.log(`Listening on port: ${port}`)
 );
+
+app.get('/vid.jpg', function(req, res) {
+  connections++;
+  res.writeHead(200, {
+      'Content-Type': 'multipart/x-mixed-replace;boundary="' + boundaryID + '"',
+      'Connection': 'keep-alive',
+      'Expires': 'Fri, 27 May 1977 00:00:00 GMT',
+      'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'Pragma': 'no-cache'
+  });
+
+  var sub = PubSub.subscribe('MJPEG', function(msg, data) {
+
+      console.log(data.length);
+
+      res.write('--' + boundaryID + '\r\n')
+      res.write('Content-Type: image/jpeg\r\n');
+      res.write('Content-Length: ' + data.length + '\r\n');
+      res.write("\r\n");
+      res.write(data, 'binary');
+      res.write("\r\n");
+  });
+
+  res.on('close', function() {
+      PubSub.unsubscribe(sub);
+      res.end();
+      connections--;
+  });
+});
 
 var WS_CONTROL_ENDPOINT = '/control'
 var WS_VIDEO_ENDPOINT = '/video'
@@ -84,6 +123,10 @@ socketVideo.broadcast = (data) => {
 
 mp4Reader.on('data', (data) => {
     socketVideo.broadcast(data);
+
+    if (ffmpeg && !ffmpeg.killed && ffmpeg.stdin.writable) {
+      ffmpeg.stdin.write(data);
+    }
 })
 
 
@@ -128,3 +171,57 @@ carplay.on('status', (data) => {
         data: data.status ? 'plugged' : 'unplugged'
     });
 })
+
+// -----------------------------------------------------------------------------
+//                               FFMPEG MJPEG
+// -----------------------------------------------------------------------------
+
+var ffmpeg = null;
+function ff() {
+  ffmpeg = spawn("ffmpeg", [
+    "-threads",
+    "4",
+    "-i",
+    "-",
+    "-vf",
+    "fps=30",
+    '-c:v', 'mjpeg',
+     '-q:v','3',
+     '-an',
+    "-f",
+    "mjpeg",
+    "-"
+  ]);
+
+  ffmpeg.stdout.on("data", (chunk) => {
+    if (chunk[0] == 0xFF && chunk[1] == 0xD8) {
+        PubSub.publish('MJPEG', chunks);
+        chunks = chunk;
+    } else {
+        chunks = Buffer.concat([chunks, chunk]);
+    }
+  });
+
+  ffmpeg.stderr.on('data', data => {
+    console.log(`ffmpeg stderr: ${data}`);
+  });
+
+  ffmpeg.on('error', restartFfmpeg);
+  ffmpeg.on('end', restartFfmpeg);
+  ffmpeg.on('close', restartFfmpeg);
+
+  return ffmpeg;
+}
+
+function restartFfmpeg() {
+  killFfmpeg();
+  chunks = Buffer.from([])
+  ffmpeg = ff();
+}
+
+function killFfmpeg() {
+  if (ffmpeg) ffmpeg.kill('SIGHUP');
+  ffmpeg = null;
+}
+
+restartFfmpeg();
