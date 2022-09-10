@@ -7,15 +7,14 @@ We are going to create a Wifi networks from a Raspberry Pi and a 4G chip. Tesla 
 
 Requirement
 ------
- - Raspberry Pi 4 (recommended) or Raspberry Pi 3
+ - at least a Raspberry Pi zero W seems to be sufficient
  - Micro SD Card
- - 4G USB Key (test with Huawei E3372)
+ - 4G USB Key (test with Huawei E3372) or 4G/5G router (NetGear Nighthawk can be easily routed to run iptables commands)
  - SIM card with 4G
  - Carlinkit (test with CPC200)
  - USB keyboard
- - Micro-HDMI to HDMI
  - Ethernet with internet
- - USB-C Cable for power supply.
+ - USB cables
 
 *(It is also possible to replace the 4G adapter and the sim card, by a telephone connection sharing. This tutorial is not that solution at the moment. And wireless carplay does not allow Wi-Fi connection sharing to be used at the same time.)*
 
@@ -422,9 +421,10 @@ nano /etc/nginx/conf.d/carplay.conf
 You are going to paste this :
 ```
 server {
-    server_name carplay.lan;
-    listen [::]:80;
-    listen 80;
+    server_name _;
+    ssl_certificate /root/tesla-carplay/certs/carplayServer.crt; #path to cert
+    ssl_certificate_key /root/tesla-carplay/certs/carplayServer.key; #path to key
+    listen 443 ssl;
     location / {
      root /var/www/carplay;
      index index.html;
@@ -441,6 +441,8 @@ server {
 ```
 You can now save the file with `CTRL + O` then `Enter`. And quit `nano` text editor with `CTRL + X`
 
+As you may see you need a trusted certificate and its key (and the associated subdomain pointing onto 240.3.3.4 for instance).
+Why? because you need VideoDecoder object which require a secure context to be available on Chrome. This allow the browser to be able to render h264 using either canvas2d, webgl or webgl2. And then it works when you drive too.
 
 We restart the software for the new configuration under apply with :
 ```
@@ -635,11 +637,13 @@ It was not easy, congratulations if it works, if you see bugs, or if you want to
 About Tesla Security
 ------
  - You cannot connect with your tesla to a Wi-Fi network that does not have internet access. We therefore need 3G/4G internet access.
+ - SSL certificate needs to be a real one because Tesla Browser doesn't allow insecure certificate (no way to validate exceptions)
  - Tesla's browser blocks access to the website which is located on a private IP address (192.168.X.X, 10.X.X.X, 172.X.X.X). We can bypass this security with IPTABLES
+- 240.3.3.X are non-routed public IP range (it can be used on internet)
 
  ```
- iptables -t nat -A PREROUTING -d 1.1.1.1 -i wlan0 -p tcp --dport 80 -j DNAT --to-destination 192.168.0.254
- iptables -t nat -A PREROUTING -d 1.1.1.1 -i wlan0 -p udp --dport 80 -j DNAT --to-destination 192.168.0.254
- iptables -t nat -A POSTROUTING -s 192.168.0.254 -p tcp --dport 80 -j SNAT --to-source 1.1.1.1
- iptables -t nat -A POSTROUTING -s 192.168.0.254 -p udp --dport 80 -j SNAT --to-source 1.1.1.1
+ iptables -t nat -A PREROUTING -d 240.3.3.4 -i wlan0 -p tcp --dport 80 -j DNAT --to-destination 192.168.0.254
+ iptables -t nat -A PREROUTING -d 240.3.3.4 -i wlan0 -p udp --dport 80 -j DNAT --to-destination 192.168.0.254
+ iptables -t nat -A POSTROUTING -s 192.168.0.254 -p tcp --dport 80 -j SNAT --to-source 240.3.3.4
+ iptables -t nat -A POSTROUTING -s 192.168.0.254 -p udp --dport 80 -j SNAT --to-source 240.3.3.4
  ```

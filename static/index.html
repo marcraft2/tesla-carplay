@@ -1,7 +1,6 @@
 <html>
   <head>
     <title>Carplay</title>
-    <script type="text/javascript" src="./jmuxer.min.js"></script>
   </head>
   <style>
   body {
@@ -13,7 +12,7 @@
     width: 100%;
     margin: 0;
   }
-  video {
+  canvas {
     width: 100%;
   }
   </style>
@@ -25,18 +24,17 @@
          onmousedown="handleMouseDown(event)"
          onmouseup="handleMouseUp(event)"
          onmousemove="handleMouseMove(event)">
-          <video autoPlay muted id="player" />
+          <canvas id="player" />
     </div>
   </body>
   <script>
-  var jmuxer;
   const carplayWidth = 900;
   const carplayHeight = 702;
 
   const host = window.location.hostname + ':' + window.location.port;
   var height, width, lastX, lastY, mouseDown;
 
-  var ws = new WebSocket('ws://'+host+'/ws/control');
+  var ws = new WebSocket('wss://'+host+'/ws/control');
   ws.onopen = function () {
       ws.send(JSON.stringify({type: 'statusReq'}))
   }
@@ -65,23 +63,22 @@
   height = player.height = width * carplayHeight / carplayWidth;
   var lastX = 0;
   var lastY = 0;
+  let canvas = player.transferControlToOffscreen();
+  const worker = new Worker("./worker.js");
+  const foo = null;
+  worker.addEventListener("message", console.log);
 
-  var socketURL = 'ws://' + host + '/ws/video';
-  jmuxer = new JMuxer({
-    node: 'player',
-    mode: 'video',
-    flushingTime: 1000,
-    maxDelay: 100,
-    fps: 30,
-    debug: true
-  });
-
+  var socketURL = 'wss://' + host + '/ws/video';
   var wsVideo = new WebSocket(socketURL);
+
+  
   wsVideo.binaryType = 'arraybuffer';
   wsVideo.addEventListener('message',function(event) {
-    jmuxer.feed({
-      video: new Uint8Array(event.data)
-    });
+    const data = new Uint8Array(event.data);
+    worker.postMessage({canvas,
+     data
+    },[canvas]);
+    canvas = new ArrayBuffer();
   });
 
   wsVideo.addEventListener('error', function(e) {
