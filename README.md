@@ -1,7 +1,7 @@
 
 # Tesla Carplay
 
-This project allows you to have Carplay in the tesla browser with Raspberry Pi 4 or Raspberry Pi 3.
+This project allows you to have Carplay in the tesla browser with Raspberry Pi. At least a Raspberry Pi zero W seems to be sufficient.
 
 ## Demo
 
@@ -18,7 +18,7 @@ In fact, add a Raspberry Pi into the tesla, this allows us to create a wifi netw
 
 - Siri (under test)
 - Sound of calls & Microphone (under test)
-- Steering wheel control
+- Steering wheel control (AVRCP)
 
 ## About
 
@@ -29,7 +29,13 @@ In fact, add a Raspberry Pi into the tesla, this allows us to create a wifi netw
 
 ## Version / Updates
 
-Current version : `v0.3`
+Current version : `v0.4`
+
+### `v0.4`
+- Remove jmuxer for rendering by canvas (thanks to [rhysmorgan134](https://github.com/darreal44))
+- Fix in drive mode
+
+[from v0.2 to v0.3](https://github.com/marcdubois71450/tesla-carplay/issues/20)
 
 ### `v0.3`
 -  Wireless CarPlay works 🍾

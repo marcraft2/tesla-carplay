@@ -1,5 +1,5 @@
 importScripts("renderer_2d.js", "renderer_webgl.js", "renderer_webgpu.js");
-  
+
 // Rendering. Drawing is limited to once per animation frame.
 let renderer = null;
 let pendingFrame = null;
@@ -17,7 +17,7 @@ const frameDuration = (1000 / fps) | 1;
     error(e) {
       setlog("decode", e);
     }
-  }); 
+  });
 
 function renderFrame(frame) {
   if (!pendingFrame) {
@@ -39,7 +39,7 @@ function renderAnimationFrame() {
   renderer.draw(pendingFrame);
   pendingFrame = null;
 }
-  
+
   // Startup.
 function start({canvas, data}) {
   if (renderer === null) {
@@ -69,9 +69,9 @@ function start({canvas, data}) {
       data: data,
       timestamp: frameCount*frameDuration
     }
-  let chunk = new EncodedVideoChunk(init); 
+  let chunk = new EncodedVideoChunk(init);
   decoder.decode(chunk);
   frameCount++;
-} 
+}
 // Listen for the start request.
 self.addEventListener("message", message => start(message.data), {once: false});

@@ -80,7 +80,7 @@ class WebGLRenderer {
     this.#canvas.height = frame.displayHeight;
 
     const gl = this.#ctx;
-  
+
     // Upload the frame.
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, frame);
     frame.close();

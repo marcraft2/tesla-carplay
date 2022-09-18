@@ -7,7 +7,7 @@ We are going to create a Wifi networks from a Raspberry Pi and a 4G chip. Tesla 
 
 Requirement
 ------
- - at least a Raspberry Pi zero W seems to be sufficient
+ - At least a Raspberry Pi zero W seems to be sufficient
  - Micro SD Card
  - 4G USB Key (test with Huawei E3372) or 4G/5G router (NetGear Nighthawk can be easily routed to run iptables commands)
  - SIM card with 4G
@@ -227,62 +227,6 @@ systemctl restart hostapd
 Your wifi network are ready, you should see it in the list of your wifi network on your pc or smartphone. However, this network does not have internet access at the moment.
 
 
-Create DNS Zone | bind9
-------
-
-```
-apt install bind9 -y
-```
-
-We are now going to configure the dns by editing this file `/etc/bind/db.carplay.lan`
-
-For that we will use the `nano` text editor :
-
-```
-nano /etc/bind/db.carplay.lan
-```
-
-You are going to paste this :
-```
-$TTL    604800
-@       IN      SOA     ns.carplay.lan. root.carplay.lan. (
-                        2           ; Serial
-                        604800      ; Refresh
-                        86400       ; Retry
-                        2419200     ; Expire
-                        604800 )    ; Negative Cache TTL
-;
-@       IN      NS      ns.carplay.lan.
-ns      IN      A       192.168.0.254
-carplay.lan. IN A       1.1.1.1
-```
-You can now save the file with `CTRL + O` then `Enter`. And quit `nano` text editor with `CTRL + X`
-
-(`1.1.1.1` is use for bypass tesla local ip blocking)
-
-We also need to edit the following file to apply the configuration.
-```
-nano /etc/bind/named.conf.local
-```
-
-Add this below the comment :
-```
-zone "carplay.lan" {
-    type master;
-    file "/etc/bind/db.carplay.lan";
-    notify no;
-};
-```
-You can now save the file with `CTRL + O` then `Enter`. And quit `nano` text editor with `CTRL + X`
-
-
-We restart the software for the new configuration under apply with :
-
-```
-systemctl restart bind9
-```
-
-
 Create DHCP Server | udhcpd
 ------
 
@@ -305,7 +249,7 @@ start 192.168.0.20
 end 192.168.0.50
 interface wlan0
 remaining yes
-opt dns 192.168.0.254
+opt dns 8.8.8.8 8.8.4.4
 option subnet 255.255.255.0
 opt router 192.168.0.254
 option lease 864000
@@ -374,13 +318,18 @@ COMMIT
 :INPUT ACCEPT [141:10290]
 :OUTPUT ACCEPT [1105:91323]
 :POSTROUTING ACCEPT [7:331]
--A PREROUTING -d 1.1.1.1/32 -i wlan0 -p tcp -m tcp --dport 80 -j DNAT --to-destination 192.168.0.254
--A PREROUTING -d 1.1.1.1/32 -i wlan0 -p udp -m udp --dport 80 -j DNAT --to-destination 192.168.0.254
+-A PREROUTING -d 240.3.3.4/32 -i wlan0 -p tcp -m tcp --dport 80 -j DNAT --to-destination 192.168.0.254
+-A PREROUTING -d 240.3.3.4/32 -i wlan0 -p udp -m udp --dport 80 -j DNAT --to-destination 192.168.0.254
+-A PREROUTING -d 240.3.3.4/32 -i wlan0 -p tcp -m tcp --dport 443 -j DNAT --to-destination 192.168.0.254
+-A PREROUTING -d 240.3.3.4/32 -i wlan0 -p udp -m udp --dport 443 -j DNAT --to-destination 192.168.0.254
 -A POSTROUTING -o eth1 -j MASQUERADE
--A POSTROUTING -s 192.168.0.254/32 -p tcp -m tcp --dport 80 -j SNAT --to-source 1.1.1.1
--A POSTROUTING -s 192.168.0.254/32 -p udp -m udp --dport 80 -j SNAT --to-source 1.1.1.1
+-A POSTROUTING -s 192.168.0.254/32 -p tcp -m tcp --dport 80 -j SNAT --to-source 240.3.3.4
+-A POSTROUTING -s 192.168.0.254/32 -p udp -m udp --dport 80 -j SNAT --to-source 240.3.3.4
+-A POSTROUTING -s 192.168.0.254/32 -p tcp -m tcp --dport 443 -j SNAT --to-source 240.3.3.4
+-A POSTROUTING -s 192.168.0.254/32 -p udp -m udp --dport 443 -j SNAT --to-source 240.3.3.4
 COMMIT
 # Completed on Tue Nov 16 23:51:53 2021
+
 ```
 
 We will be able to activate it is the rule at startup.
@@ -406,9 +355,97 @@ iface wlan0 inet static
 Create Web Server for tesla-carplay | nginx
 ------
 
+For this step you need a trusted certificate and its key.
+Why? because you need VideoDecoder object which require a secure context to be available on Chrome. This allow the browser to be able to render h264 using either canvas2d, webgl or webgl2. And then it works when you drive too.
+
+So we need a domain name, for that we go to the freenom site, which provides free domain names.
+Create an account and reserve the domain name you like for free. I chose `carplay.ml` for my installation. Check that the domain is available in the list of your domains on the site after the order.
+
+Now we will generate an HTTPS (SSL) certificate for this we will use cerbot. It is a tool to generate a certificate with let's encrypt, which signs your certificate via a challenge on the DNS of your domain name. If the challenge is successful, let's encrypt delivers the certificates to you. To validate this challenge we will allow cerbot to access our frenom account so that it can automatically do the DNS challenge.
+
+We will use the `nano` text editor :
+
 ```
-apt install nginx -y
+nano /var/credentials.ini
 ```
+You are going to paste this :
+```
+dns_freenom_username = username
+dns_freenom_password = password
+```
+Replace username and password with our email address and your freenom password
+You can now save the file with `CTRL + O` then `Enter`. And quit `nano` text editor with `CTRL + X`
+
+
+
+Now we will install nginx, certbot, and the freenom plugins for cerbot :
+```
+apt install python3-pip nginx -y
+pip3 install certbot certbot-dns-freenom
+```
+
+Now we start the automatic generation of certificates (replace the email address, by your email address, and the domain by your domain) :
+```
+certbot certonly -a dns-freenom \
+  --dns-freenom-credentials /var/credentials.ini \
+  --dns-freenom-propagation-seconds 600 \
+  -d "carplay.ml" \
+  -m yourmail@domain.tld \
+  --agree-tos -n
+```
+It's long... (600 seconds = 10 minutes)
+
+
+If all goes well you should see this :
+```
+root@carplay:~# certbot certonly -a dns-freenom \
+  --dns-freenom-credentials /var/credentials.ini \
+  --dns-freenom-propagation-seconds 600 \
+  -d "carplay.ml" \
+  -m xxxxxx@gmail.com \
+  --agree-tos -n
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Account registered.
+Requesting a certificate for carplay.ml
+Unsafe permissions on credentials configuration file: /var/credentials.ini
+doLogin: Login successfully.
+setRecord: Record added successfully
+Waiting 300 seconds for DNS changes to propagate
+delRecord: Record deleted successfully
+
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/carplay.ml/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/carplay.ml/privkey.pem
+This certificate expires on 2022-12-17.
+These files will be updated when the certificate renews.
+
+NEXT STEPS:
+- The certificate will need to be renewed before it expires. Certbot can automatically renew the certificate in the background, but you may need to take steps to enable that functionality. See https://certbot.org/renewal-setup for instructions.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+If you like Certbot, please consider supporting our work by:
+ * Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+ * Donating to EFF:                    https://eff.org/donate-le
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+```
+
+As we can see, it creates our fullchain and our privkey
+```
+root@carplay:~# ls /etc/letsencrypt/live/carplay.ml/
+cert.pem  chain.pem  fullchain.pem  privkey.pem  README
+```
+
+The certificate must be updated, for this we add a task at startup thanks to cron, for this:
+```
+crontab -e
+```
+Press `1` for nano selection if prompted.
+```
+@reboot while ! ping -c 1 -n -w 1 8.8.8.8 > /dev/null ; do true; done && certbot renew -q
+```
+You can now save the file with `CTRL + O` then `Enter`. And quit `nano` text editor with `CTRL + X`
+Now at each start the certificate will be updated if necessary as soon as the internet connection is accessible.
+
 
 We are now going to configure the nginx web server by editing this file `/etc/nginx/conf.d/carplay.conf`
 
@@ -418,12 +455,19 @@ We will use the `nano` text editor :
 nano /etc/nginx/conf.d/carplay.conf
 ```
 
-You are going to paste this :
+You are going to paste this (replacing `carplay.ml` with your domain):
 ```
 server {
-    server_name _;
-    ssl_certificate /root/tesla-carplay/certs/carplayServer.crt; #path to cert
-    ssl_certificate_key /root/tesla-carplay/certs/carplayServer.key; #path to key
+  listen 80;
+  server_name carplay.ml;
+  return 301 https://carplay.ml;
+}
+
+server {
+    server_name carplay.ml;
+    ssl_certificate /etc/letsencrypt/live/carplay.ml/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/carplay.ml/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/carplay.ml/chain.pem;
     listen 443 ssl;
     location / {
      root /var/www/carplay;
@@ -441,14 +485,24 @@ server {
 ```
 You can now save the file with `CTRL + O` then `Enter`. And quit `nano` text editor with `CTRL + X`
 
-As you may see you need a trusted certificate and its key (and the associated subdomain pointing onto 240.3.3.4 for instance).
-Why? because you need VideoDecoder object which require a secure context to be available on Chrome. This allow the browser to be able to render h264 using either canvas2d, webgl or webgl2. And then it works when you drive too.
-
 We restart the software for the new configuration under apply with :
 ```
 systemctl enable nginx
 systemctl restart nginx
 ```
+
+You must now point the domain you created to the IP address
+
+To do this, go to your freenom account, create an A record at the root of your account so that your domain points to the IP.
+For thats `Services` => `Domaines` => `Manage Domain` => `Manage Freenom DNS` => Leave Name empty, type: `A`, target: `240.3.3.4` => `Save Change`.
+
+We can check your domain with dig :
+```
+root@carplay:~# apt install dnsutils -y
+root@carplay:~# dig carplay.ml +short
+240.3.3.4
+```
+(it may be necessary to wait for the record to spread)
 
 
 Bluetooth connection | bluez-alsa
@@ -627,9 +681,10 @@ Enjoy
 - Connect your Tesla to the bluetooth of the raspberry from the bluetooth settings of the tesla
 - Connect your Tesla to your Raspberry Wi-Fi
 - Plug in your iPhone
-- Open your browser to carplay.lan
+- Open your browser on your domain (me is `carplay.ml`)
 - Enjoy
 
+Note/Bug: If sound comes out of carplay before the bluetooth is connected to the tesla, the sound will not work. You must connect the tesla bluetooth before carplay starts on your iPhone.
 
 It was not easy, congratulations if it works, if you see bugs, or if you want to help the project, or if you simply have questions, it is with great pleasure.
 
@@ -639,11 +694,15 @@ About Tesla Security
  - You cannot connect with your tesla to a Wi-Fi network that does not have internet access. We therefore need 3G/4G internet access.
  - SSL certificate needs to be a real one because Tesla Browser doesn't allow insecure certificate (no way to validate exceptions)
  - Tesla's browser blocks access to the website which is located on a private IP address (192.168.X.X, 10.X.X.X, 172.X.X.X). We can bypass this security with IPTABLES
-- 240.3.3.X are non-routed public IP range (it can be used on internet)
+ - 240.3.3.X are non-routed public IP range (it can be used on internet)
 
  ```
  iptables -t nat -A PREROUTING -d 240.3.3.4 -i wlan0 -p tcp --dport 80 -j DNAT --to-destination 192.168.0.254
  iptables -t nat -A PREROUTING -d 240.3.3.4 -i wlan0 -p udp --dport 80 -j DNAT --to-destination 192.168.0.254
+ iptables -t nat -A PREROUTING -d 240.3.3.4 -i wlan0 -p tcp --dport 443 -j DNAT --to-destination 192.168.0.254
+ iptables -t nat -A PREROUTING -d 240.3.3.4 -i wlan0 -p udp --dport 443 -j DNAT --to-destination 192.168.0.254
  iptables -t nat -A POSTROUTING -s 192.168.0.254 -p tcp --dport 80 -j SNAT --to-source 240.3.3.4
  iptables -t nat -A POSTROUTING -s 192.168.0.254 -p udp --dport 80 -j SNAT --to-source 240.3.3.4
+ iptables -t nat -A POSTROUTING -s 192.168.0.254 -p tcp --dport 443 -j SNAT --to-source 240.3.3.4
+ iptables -t nat -A POSTROUTING -s 192.168.0.254 -p udp --dport 443 -j SNAT --to-source 240.3.3.4
  ```

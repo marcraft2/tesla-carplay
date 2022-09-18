@@ -71,7 +71,7 @@
   var socketURL = 'wss://' + host + '/ws/video';
   var wsVideo = new WebSocket(socketURL);
 
-  
+
   wsVideo.binaryType = 'arraybuffer';
   wsVideo.addEventListener('message',function(event) {
     const data = new Uint8Array(event.data);
