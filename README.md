@@ -32,7 +32,7 @@ In fact, add a Raspberry Pi into the tesla, this allows us to create a wifi netw
 Current version : `v0.4`
 
 ### `v0.4`
-- Remove jmuxer for rendering by canvas (thanks to [rhysmorgan134](https://github.com/darreal44))
+- Remove jmuxer for rendering by canvas (thanks to [darreal44](https://github.com/darreal44))
 - Fix in drive mode
 
 [from v0.2 to v0.3](https://github.com/marcdubois71450/tesla-carplay/issues/20)
