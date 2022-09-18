@@ -13,10 +13,14 @@ COMMIT
 :INPUT ACCEPT [141:10290]
 :OUTPUT ACCEPT [1105:91323]
 :POSTROUTING ACCEPT [7:331]
--A PREROUTING -d 1.1.1.1/32 -i wlan0 -p tcp -m tcp --dport 80 -j DNAT --to-destination 192.168.0.254
--A PREROUTING -d 1.1.1.1/32 -i wlan0 -p udp -m udp --dport 80 -j DNAT --to-destination 192.168.0.254
+-A PREROUTING -d 240.3.3.4/32 -i wlan0 -p tcp -m tcp --dport 80 -j DNAT --to-destination 192.168.0.254
+-A PREROUTING -d 240.3.3.4/32 -i wlan0 -p udp -m udp --dport 80 -j DNAT --to-destination 192.168.0.254
+-A PREROUTING -d 240.3.3.4/32 -i wlan0 -p tcp -m tcp --dport 443 -j DNAT --to-destination 192.168.0.254
+-A PREROUTING -d 240.3.3.4/32 -i wlan0 -p udp -m udp --dport 443 -j DNAT --to-destination 192.168.0.254
 -A POSTROUTING -o eth1 -j MASQUERADE
--A POSTROUTING -s 192.168.0.254/32 -p tcp -m tcp --dport 80 -j SNAT --to-source 1.1.1.1
--A POSTROUTING -s 192.168.0.254/32 -p udp -m udp --dport 80 -j SNAT --to-source 1.1.1.1
+-A POSTROUTING -s 192.168.0.254/32 -p tcp -m tcp --dport 80 -j SNAT --to-source 240.3.3.4
+-A POSTROUTING -s 192.168.0.254/32 -p udp -m udp --dport 80 -j SNAT --to-source 240.3.3.4
+-A POSTROUTING -s 192.168.0.254/32 -p tcp -m tcp --dport 443 -j SNAT --to-source 240.3.3.4
+-A POSTROUTING -s 192.168.0.254/32 -p udp -m udp --dport 443 -j SNAT --to-source 240.3.3.4
 COMMIT
 # Completed on Tue Nov 16 23:51:53 2021
