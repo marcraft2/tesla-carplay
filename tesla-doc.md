@@ -543,7 +543,7 @@ nano /etc/systemd/system/bluetooth.target.wants/bluetooth.service
 And while we're here we'll disable sap since this may cause some errors:
 
 ```
-ExecStart=/usr/libexec/bluetooth/bluetoothd --noplugin=sap --plugin=a2dp
+ExecStart=/usr/libexec/bluetooth/bluetoothd --noplugin=sap --plugin=a2dp,avrcp
 ```
 
 Rename raspberry pi bluetooth name:  

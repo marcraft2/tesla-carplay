@@ -19,7 +19,7 @@ function _INIT_SERVER() {
           hand: 0,
           boxName: 'nodePlay',
           width: 900,
-          height: 702,
+          height: 685,
           fps: 30
   }
   console.log('Spawning carplay', config)
