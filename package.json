@@ -3,6 +3,7 @@
   "author": "Marc Dubois",
   "version": "0.3",
   "dependencies": {
+    "bluez": "^0.4.5",
     "node-carplay": "^2.0.9",
     "ws": "^8.2.3"
   }
