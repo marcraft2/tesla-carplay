@@ -11,7 +11,7 @@ Requirement
  - Micro SD Card
  - 4G USB Key (test with Huawei E3372) or 4G/5G router (NetGear Nighthawk can be easily routed to run iptables commands)
  - SIM card with 4G
- - Carlinkit (test with CPC200)
+ - Carlinkit (test with CPC200 2.0)
  - USB keyboard
  - Ethernet with internet
  - USB cables
@@ -101,11 +101,11 @@ systemctl restart sshd
 SSH Connection
 ------
 
-Look at the ip address of your `eth0` ethernet interface :
+Look at the ip address of your `eth0` (or something like `enp0s3`) ethernet interface :
 ```
 ip a
 ```
-It should look like 192.168.X.X or 10.X.X.X on eth0
+It should look like 192.168.X.X or 10.X.X.X on this interface
 
 At home I received this ip address 192.168.1.68, yours will certainly be different.
 
@@ -329,7 +329,6 @@ COMMIT
 -A POSTROUTING -s 192.168.0.254/32 -p udp -m udp --dport 443 -j SNAT --to-source 240.3.3.4
 COMMIT
 # Completed on Tue Nov 16 23:51:53 2021
-
 ```
 
 We will be able to activate it is the rule at startup.
@@ -358,8 +357,8 @@ Create Web Server for tesla-carplay | nginx
 For this step you need a trusted certificate and its key.
 Why? because you need VideoDecoder object which require a secure context to be available on Chrome. This allow the browser to be able to render h264 using either canvas2d, webgl or webgl2. And then it works when you drive too.
 
-So we need a domain name, for that we go to the freenom site, which provides free domain names.
-Create an account and reserve the domain name you like for free. I chose `carplay.ml` for my installation. Check that the domain is available in the list of your domains on the site after the order.
+So we need a domain name, for that we go to the [freenom](https://www.freenom.com/) site, which provides free domain names.
+Create an account and reserve the domain name you like for free. I chose `carplay.ml` for my installation. Check that the domain is available in the list of your domains on the site after the order. (You must be logged in to see the availability of domains, without it they will all be marked unavailable)
 
 Now we will generate an HTTPS (SSL) certificate for this we will use cerbot. It is a tool to generate a certificate with let's encrypt, which signs your certificate via a challenge on the DNS of your domain name. If the challenge is successful, let's encrypt delivers the certificates to you. To validate this challenge we will allow cerbot to access our frenom account so that it can automatically do the DNS challenge.
 
@@ -410,7 +409,7 @@ Requesting a certificate for carplay.ml
 Unsafe permissions on credentials configuration file: /var/credentials.ini
 doLogin: Login successfully.
 setRecord: Record added successfully
-Waiting 300 seconds for DNS changes to propagate
+Waiting 600 seconds for DNS changes to propagate
 delRecord: Record deleted successfully
 
 Successfully received certificate.
@@ -440,6 +439,8 @@ The certificate must be updated, for this we add a task at startup thanks to cro
 crontab -e
 ```
 Press `1` for nano selection if prompted.
+
+And paste this after the comments:
 ```
 @reboot while ! ping -c 1 -n -w 1 8.8.8.8 > /dev/null ; do true; done && certbot renew -q
 ```
@@ -640,12 +641,6 @@ This is the music of victory.
 
 You can either play with the auto connection in your tesla settings, or you can do this if that's not enough:
 
-Add the following line to `nano /etc/rc.local` before `exit`:
-
-```
-echo -e "power on\nconnect AA:BB:CC:DD:EE:FF\n quit"|bluetoothctl
-```
-
 
 Create Node Carplay Server | tesla-carplay
 ------
@@ -680,11 +675,11 @@ Enjoy
 - Reboot your raspberry so that everything starts correctly
 - Connect your Tesla to the bluetooth of the raspberry from the bluetooth settings of the tesla
 - Connect your Tesla to your Raspberry Wi-Fi
-- Plug in your iPhone
+- Plug in your iPhone (If wireless carplay is not already synced)
 - Open your browser on your domain (me is `carplay.ml`)
 - Enjoy
 
-Note/Bug: If sound comes out of carplay before the bluetooth is connected to the tesla, the sound will not work. You must connect the tesla bluetooth before carplay starts on your iPhone.
+If a step of this tutorial does not work for you, do not hesitate to [open an issue](https://github.com/marcdubois71450/tesla-carplay/issues/new/choose), it will be with pleasure that I will answer you.
 
 It was not easy, congratulations if it works, if you see bugs, or if you want to help the project, or if you simply have questions, it is with great pleasure.
 
