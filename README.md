@@ -3,6 +3,13 @@
 
 This project allows you to have Carplay in the tesla browser with Raspberry Pi. At least a Raspberry Pi zero W seems to be sufficient.
 
+
+The manufacturer carlinkit now has a turnkey solution, which works exactly the same way as this project. For those interested here is the [link](https://carlinkitcarplay.com/products/carlinkit-t2c-tesla-wireless-apple-carplay-adapter). Overall price level as much to favor the carlinkit solution. This will also save you all the manual installation, and the project is completely finished with an after-sales service.
+Carlinkit Solution ($118)
+This Project Solution (Pi Zero $10, 4G Adapter $50, Carlinkit USB $50)
+The solution of this project remains advantageous if you already have the material at home.
+
+
 ## Demo
 
 - Youtube [link v0.1](https://youtu.be/6aNyr-Qt1Ts)
