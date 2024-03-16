@@ -651,7 +651,7 @@ apt-get install -y nodejs
 npm install -g npm@latest
 npm i -g pm2
 cd /root/
-git clone https://github.com/marcdubois71450/tesla-carplay.git
+git clone https://github.com/marcraft2/tesla-carplay.git
 cd tesla-carplay
 mkdir /var/www/carplay/
 cp static/* /var/www/carplay/
