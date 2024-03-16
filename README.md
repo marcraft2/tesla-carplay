@@ -23,7 +23,7 @@ In fact, add a Raspberry Pi into the tesla, this allows us to create a wifi netw
 
 ## Install / About
 
-- You can find a [documentation](https://github.com/marcdubois71450/tesla-carplay/blob/master/tesla-doc.md) for the installation, with the necessary material.
+- You can find a [documentation](https://github.com/marcraft2/tesla-carplay/blob/master/tesla-doc.md) for the installation, with the necessary material.
 - If you open Carplay in a browser on a computer, you must simulate a touch screen, otherwise you cannot control Carplay.
 - This solution requires a 4G subscription, however you no longer need to pay the tesla subscription, and you have Wi-Fi in your car. (The tesla does not connect to your raspberry's Wi-Fi network if there is no internet access, you can however try ethernet at home)
 
@@ -36,13 +36,13 @@ Current version : `v0.4`
 - Remove jmuxer for rendering by canvas (thanks to [darreal44](https://github.com/darreal44))
 - Fix Audio (Now carplay start once bluetooth is connected)
 
-[from v0.3 to v0.4](https://github.com/marcdubois71450/tesla-carplay/issues/20)
+[from v0.3 to v0.4](https://github.com/marcraft2/tesla-carplay/issues/20)
 
 ### `v0.3`
 -  Wireless CarPlay works 🍾
 - The video is no longer encoded on the Raspberry Pi, jmuxer allows you to decode the raw mp4 stream directly in the tesla browser. (The screen resolution limit no longer depends on the Raspberry Pi, but on the tesla browser. Which means that the project should work on a Raspberry Pi 3
 
-[from v0.2 to v0.3](https://github.com/marcdubois71450/tesla-carplay/issues/12)
+[from v0.2 to v0.3](https://github.com/marcraft2/tesla-carplay/issues/12)
 
 ### `v0.2`
 - Sound works with bluetooth
