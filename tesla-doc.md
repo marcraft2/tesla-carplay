@@ -679,7 +679,7 @@ Enjoy
 - Open your browser on your domain (me is `carplay.ml`)
 - Enjoy
 
-If a step of this tutorial does not work for you, do not hesitate to [open an issue](https://github.com/marcdubois71450/tesla-carplay/issues/new/choose), it will be with pleasure that I will answer you.
+If a step of this tutorial does not work for you, do not hesitate to [open an issue](https://github.com/marcraft2/tesla-carplay/issues/new/choose), it will be with pleasure that I will answer you.
 
 It was not easy, congratulations if it works, if you see bugs, or if you want to help the project, or if you simply have questions, it is with great pleasure.
 
